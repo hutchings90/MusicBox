@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Music Sequencer</title>
+
+	<link rel='stylesheet' type='text/css' href='css/styles.css'>
+
+	<script src='js/Vue/vue.js'></script>
+</head>
+<body>
+	<div id='music-sequencer-app'>
+		<music-sequencer
+			:stream=stream
+			:audio-context=audioContext></music-sequencer>
+	</div>
+
+	<script src='js/Models/Tone.js'></script>
+	<script src='js/Models/Note.js'></script>
+
+	<script src='js/Vue/MusicSequencerTempoControls.js'></script>
+	<script src='js/Vue/MusicSequencerPlayerControls.js'></script>
+	<script src='js/Vue/MusicSequencerControls.js'></script>
+	<script src='js/Vue/MusicSequencerEditorRow.js'></script>
+	<script src='js/Vue/MusicSequencerEditor.js'></script>
+	<script src='js/Vue/MusicSequencer.js'></script>
+	<script src='js/Vue/MusicSequencerApp.js'></script>
+</body>
+</html>

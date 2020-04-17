@@ -1,0 +1,78 @@
+#music-sequencer-app {
+	text-align: center;
+}
+
+.music-sequencer {
+	display: inline-block;
+	width: 800px;
+}
+
+.music-sequencer-controls {
+	text-align: center;
+	margin-bottom: 5px;
+}
+
+.music-sequencer-tempo-controls {
+	text-align: left;
+	float: left;
+}
+
+.music-sequencer-tempo-controls input {
+	border: 0;
+	width: 50px;
+}
+
+.music-sequencer-controls-spacer {
+	float: right;
+	height: 1px;
+}
+
+.music-sequencer-tempo-controls, .music-sequencer-controls-spacer {
+	width: 150px;
+}
+
+.play-pause-button {
+	width: 60px;
+}
+
+.music-sequencer-controls > div {
+	display: inline-block;
+}
+
+.music-sequencer-editor {
+	font-size: 10px;
+}
+
+table.music-sequencer-editor td:nth-child(2) {
+	width: 100%;
+}
+
+table.music-sequencer-editor th, table.music-sequencer-editor td:nth-child(2):hover, .new-note-column-marker {
+	background: #ddd;
+}
+
+table.music-sequencer-editor, th, td {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+
+.music-sequencer-editor-score {
+	position: relative;
+}
+
+.music-sequencer-editor-score div {
+	position: absolute;
+	height: 100%;
+}
+
+.score-marker {
+	background: blue;
+}
+
+.note {
+	background: green;
+}
+
+.new-note-marker {
+	background: orange;
+}
