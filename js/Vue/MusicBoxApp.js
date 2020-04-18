@@ -1,5 +1,5 @@
 new Vue({
-	el: '#music-sequencer-app',
+	el: '#music-box-app',
 	data() {
 		return {
 			stream: null,

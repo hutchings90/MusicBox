@@ -17,8 +17,7 @@ class Tone {
 		this.play = () => {
 			gain.gain.cancelScheduledValues(0);
 
-			gain.gain.value = 0.00001;
-			gain.gain.setValueCurveAtTime([ .001, .01, .6, 0.8, 0.9, 1.0 ], audioContext.currentTime, 0.06);
+			gain.gain.setValueCurveAtTime([ Math.abs(gain.gain.value - .001) / 2, .001, .1, .5 ], audioContext.currentTime, 0.06);
 			oscillator.type = this.type;
 			gain.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 1);
 		};
@@ -29,4 +28,11 @@ class Tone {
 	get names() { return this._names(); }
 	get namesDisplay() { return this.names.join('/'); }
 	get frequency() { return this._frequency(); }
+
+	toJSON() {
+		return {
+			names: this.names,
+			frequency: this.frequency
+		};
+	}
 }

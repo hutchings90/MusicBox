@@ -1,6 +1,6 @@
-Vue.component('music-sequencer-tempo-controls', {
+Vue.component('music-box-tempo-controls', {
 	props: [ 'tempo' ],
-	template: `<div class='music-sequencer-tempo-controls'>
+	template: `<div class='music-box-tempo-controls'>
 		<label>Tempo</label>
 		<input @change=setTempo v-model=tempoEditor type=number min=30 maxLength=10/>
 	</div>`,

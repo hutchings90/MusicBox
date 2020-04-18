@@ -1,11 +1,11 @@
-Vue.component('music-sequencer-player-controls', {
-	props: [ 'beat', 'deltaBeat', 'tempoMultiplier', 'playing' ],
-	template: `<div class='music-sequencer-player-controls'>
+Vue.component('music-box-player-controls', {
+	props: [ 'beat', 'deltaBeat', 'tempoMultiplier', 'playing', 'noNotes' ],
+	template: `<div class='music-box-player-controls'>
 		<button @click=goToBeginning>|<</button>
 		<button @click=backward><</button>
 		<button @click=fastBackward><<</button>
 		<button @click=pause v-if=playing class='play-pause-button'>Pause</button>
-		<button @click=play v-else class='play-pause-button'>Play</button>
+		<button @click=play v-else :disabled=noNotes class='play-pause-button'>Play</button>
 		<button @click=stop :disabled=disableStopButton class='play-pause-button'>Stop</button>
 		<button @click=fastForward>>></button>
 		<button @click=forward>></button>

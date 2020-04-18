@@ -1,7 +1,7 @@
-Vue.component('music-sequencer', {
+Vue.component('music-box', {
 	props: [ 'stream', 'audioContext' ],
-	template: `<div class='music-sequencer'>
-		<music-sequencer-controls
+	template: `<div class='music-box'>
+		<music-box-controls
 			@set-tempo=setTempo
 			@play=pressedPlay
 			@pause=pause
@@ -14,15 +14,18 @@ Vue.component('music-sequencer', {
 			:delta-beat=deltaBeat
 			:tempo=tempo
 			:tempo-multiplier=tempoMultiplier
-			:playing=interval></music-sequencer-controls>
-		<music-sequencer-editor
+			:playing=playing
+			:no-notes=noNotes></music-box-controls>
+		<music-box-editor
 			@add-note=addNote
 			@remove-note=removeNote
+			@right-mouse-move=rightMouseMove
 			:beat=beat
 			:notes=notes
 			:playing=playing
+			:auto-progress=autoProgress
 			:stream=stream
-			:audio-context=audioContext></music-sequencer-editor>
+			:audio-context=audioContext></music-box-editor>
 	</div>`,
 	data() {
 		return {
@@ -32,6 +35,7 @@ Vue.component('music-sequencer', {
 			tempoMultiplier: 1,
 			updateIntervalTempo: false,
 			playing: false,
+			autoProgress: false,
 			notes: []
 		};
 	},
@@ -48,7 +52,8 @@ Vue.component('music-sequencer', {
 			}, {});
 		},
 		beatNotes() { return this.notesByBeat[this.beat] || []; },
-		maxBeat() { return Math.max(0, ...this.notes.map(note => note.beat)); }
+		maxBeat() { return Math.max(0, ...this.notes.map(note => note.beat)); },
+		noNotes() { return this.notes.length < 1; }
 	},
 	watch: {
 		tempo() {
@@ -61,7 +66,13 @@ Vue.component('music-sequencer', {
 			if (oldInterval) clearInterval(oldInterval);
 		},
 		beat() {
-			if (this.playing) this.beatNotes.forEach(note => note.play());
+			if (this.playing) this.playBeat();
+		},
+		playing() {
+			if (this.playing) this.playBeat();
+		},
+		maxBeat() {
+			if (this.maxBeat < 1) this.stop();
 		}
 	},
 	methods: {
@@ -75,6 +86,10 @@ Vue.component('music-sequencer', {
 		},
 		play() {
 			this.playing = true;
+			this.autoProgress = true;
+		},
+		playBeat() {
+			this.beatNotes.forEach(note => note.play());
 		},
 		pause() {
 			this.playing = false;
@@ -100,7 +115,8 @@ Vue.component('music-sequencer', {
 		},
 		step(deltaBeat) {
 			this.pause();
-			this.doBeat(deltaBeat);
+			this.goToBeat(this.beat + deltaBeat);
+			this.playBeat();
 		},
 		fastStep(deltaBeat, tempoMultiplier) {
 			if (this.beat == 0 && deltaBeat < 0) return;
@@ -115,16 +131,33 @@ Vue.component('music-sequencer', {
 			if (!this.playing) this.play();
 		},
 		goToBeginning() {
-			this.beat = 0;
+			this.goToBeat(0);
 		},
 		goToEnd() {
-			this.beat = this.maxBeat;
+			this.goToBeat(this.maxBeat);
+		},
+		goToBeat(beat) {
+			this.autoProgress = true;
+			this.beat = beat;
 		},
 		addNote(note) {
 			this.notes.push(note);
 		},
 		removeNote(noteToRemove) {
 			this.notes = this.notes.filter(note => note != noteToRemove);
+		},
+		rightMouseMove() {
+			this.autoProgress = false;
+		},
+		exportNotes() {
+			let link = document.createElement('a');
+
+			link.download = 'temp.json';
+			link.href = URL.createObjectURL(new Blob([ JSON.stringify(this.notes) ], {
+				type: 'text/plain;charset=utf-8'
+			}));
+
+			link.click();
 		}
 	}
 });

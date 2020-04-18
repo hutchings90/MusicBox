@@ -1,33 +1,40 @@
-#music-sequencer-app {
+body {
+	margin: 0;
+}
+
+#music-box-app {
 	text-align: center;
 }
 
-.music-sequencer {
-	display: inline-block;
-	width: 800px;
+.music-box {
+	margin: 0 5px;
 }
 
-.music-sequencer-controls {
+.music-box-controls {
+	background: white;
 	text-align: center;
-	margin-bottom: 5px;
+	position: sticky;
+	top: 0;
+	padding: 5px 0;
+	z-index: 1;
 }
 
-.music-sequencer-tempo-controls {
+.music-box-tempo-controls {
 	text-align: left;
 	float: left;
 }
 
-.music-sequencer-tempo-controls input {
+.music-box-tempo-controls input {
 	border: 0;
 	width: 50px;
 }
 
-.music-sequencer-controls-spacer {
+.music-box-controls-spacer {
 	float: right;
 	height: 1px;
 }
 
-.music-sequencer-tempo-controls, .music-sequencer-controls-spacer {
+.music-box-tempo-controls, .music-box-controls-spacer {
 	width: 150px;
 }
 
@@ -35,37 +42,46 @@
 	width: 60px;
 }
 
-.music-sequencer-controls > div {
+.music-box-controls > div {
 	display: inline-block;
 }
 
-.music-sequencer-editor {
+.music-box-editor {
 	font-size: 10px;
+	overflow: auto;
+	margin-bottom: 20px;
 }
 
-table.music-sequencer-editor td:nth-child(2) {
-	width: 100%;
-}
-
-table.music-sequencer-editor th, table.music-sequencer-editor td:nth-child(2):hover, .new-note-column-marker {
+.music-box-editor th, .music-box-editor td:nth-child(2):hover, .new-note-column-marker {
 	background: #ddd;
 }
 
-table.music-sequencer-editor, th, td {
+.music-box-editor, th, td {
 	border: 1px solid black;
 	border-collapse: collapse;
 }
 
-.music-sequencer-editor-score {
+.music-box-editor tbody td:nth-child(2) {
+	width: 100%;
+	overflow: hidden;
+}
+
+.music-box-editor tbody td:nth-child(2) div {
+	display: inline-block;
+	width: 10px;
+}
+
+.music-box-editor-score {
 	position: relative;
 }
 
-.music-sequencer-editor-score div {
+.music-box-editor-score div {
 	position: absolute;
 	height: 100%;
+	top: 0;
 }
 
-.score-marker {
+.beat-marker {
 	background: blue;
 }
 

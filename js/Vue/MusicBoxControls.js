@@ -1,10 +1,10 @@
-Vue.component('music-sequencer-controls', {
-	props: [ 'beat', 'deltaBeat', 'tempo', 'tempoMultiplier', 'playing' ],
-	template: `<div class='music-sequencer-controls'>
-		<music-sequencer-tempo-controls
+Vue.component('music-box-controls', {
+	props: [ 'beat', 'deltaBeat', 'tempo', 'tempoMultiplier', 'playing', 'noNotes' ],
+	template: `<div class='music-box-controls'>
+		<music-box-tempo-controls
 			@set-tempo=setTempo
-			:tempo=tempo></music-sequencer-tempo-controls>
-		<music-sequencer-player-controls
+			:tempo=tempo></music-box-tempo-controls>
+		<music-box-player-controls
 			@play=play
 			@pause=pause
 			@stop=stop
@@ -12,11 +12,12 @@ Vue.component('music-sequencer-controls', {
 			@fast-step=fastStep
 			@go-to-beginning=goToBeginning
 			@go-to-end=goToEnd
-			:playing=playing
 			:beat=beat
 			:delta-beat=deltaBeat
-			:tempo-multiplier=tempoMultiplier></music-sequencer-player-controls>
-		<div class='music-sequencer-controls-spacer'></div>
+			:tempo-multiplier=tempoMultiplier
+			:playing=playing
+			:no-notes=noNotes></music-box-player-controls>
+		<div class='music-box-controls-spacer'></div>
 	</div>`,
 	methods: {
 		setTempo(tempo) {

@@ -10,4 +10,11 @@ class Note {
 	play() {
 		this.tone.play();
 	}
+
+	toJSON() {
+		return {
+			beat: this.beat,
+			tone: this.tone
+		};
+	}
 }
