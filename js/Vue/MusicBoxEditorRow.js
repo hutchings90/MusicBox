@@ -1,7 +1,7 @@
 Vue.component('music-box-editor-row', {
 	props: [ 'scrollX', 'hoveringOverEditor', 'newNoteMarkerBeat', 'beat', 'tone', 'notes', 'playing', 'xToBeat', 'beatToX' ],
 	template: `<tr>
-		<th @mouseenter=onMouseEnterTones class='music-box-editor-tone' v-text=tone.namesDisplay></th>
+		<th @mouseenter=onMouseEnterTones :class=toneClass v-text=toneNamesDisplay></th>
 		<td @click=rowClicked @mouseenter=onMouseEnterNotes @mousemove='onmousemove($event)' @mouseleave='onmouseleave' class='music-box-editor-score'>
 			<div v-show=hoveringOverEditor :style=newNoteColumnMarkerStyle class='new-note-column-marker'></div>
 			<div :style=scoreMarkerStyle class='beat-marker'></div>
@@ -20,6 +20,18 @@ Vue.component('music-box-editor-row', {
 		};
 	},
 	computed: {
+		toneNamesDisplay() { return this.tone.namesDisplay},
+		isC() { return RegExp(/C[0-9]/).test(this.toneNamesDisplay); },
+		isMiddleC() { return this.toneNamesDisplay == 'C4'; },
+		isStandardA() { return this.toneNamesDisplay == 'A4'; },
+		toneClass() {
+			return {
+				'music-box-editor-tone': true,
+				c: this.isC && !this.isMiddleC,
+				c4: this.isMiddleC,
+				a4: this.isStandardA
+			};
+		},
 		newNoteColumnMarkerStyle() { return this.editorItemStyle(this.newNoteMarkerBeat); },
 		scoreMarkerStyle() { return this.scrollableEditorItemStyle(this.beat); },
 		newNoteMarkerStyle() { return this.editorItemStyle(this.newNoteMarkerBeat); },

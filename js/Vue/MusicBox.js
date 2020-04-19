@@ -73,6 +73,9 @@ Vue.component('music-box', {
 		},
 		maxBeat() {
 			if (this.maxBeat < 1) this.stop();
+		},
+		notes() {
+			this.autoProgress = false;
 		}
 	},
 	methods: {

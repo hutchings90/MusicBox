@@ -52,8 +52,16 @@ body {
 	margin-bottom: 20px;
 }
 
-.music-box-editor th, .music-box-editor td:nth-child(2):hover, .new-note-column-marker {
+.music-box-editor th, .new-note-column-marker {
 	background: #ddd;
+}
+
+.music-box-editor tr:hover td {
+	background: #ccc;
+}
+
+.music-box-editor tr:hover th {
+	background: #aaa;
 }
 
 .music-box-editor, th, td {
@@ -69,6 +77,18 @@ body {
 .music-box-editor tbody td:nth-child(2) div {
 	display: inline-block;
 	width: 10px;
+}
+
+.music-box-editor-tone.a4 {
+	background: #0eb;
+}
+
+.music-box-editor-tone.c {
+	background: #0be;
+}
+
+.music-box-editor-tone.c4 {
+	background: #eb0;
 }
 
 .music-box-editor-score {
