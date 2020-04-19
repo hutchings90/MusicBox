@@ -2,7 +2,6 @@ new Vue({
 	el: '#music-box-app',
 	data() {
 		return {
-			stream: null,
 			audioContext: null
 		};
 	},
@@ -13,7 +12,6 @@ new Vue({
 	},
 	methods: {
 		gotStream(stream) {
-			this.stream = stream;
 			this.audioContext = new AudioContext();
 		},
 		getStreamError(err) {

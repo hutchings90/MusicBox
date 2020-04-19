@@ -1,20 +1,19 @@
 class Note {
 	constructor(beat, tone) {
-		this._beat = () => beat;
-		this._tone = () => tone;
+		makeReadOnlyProperty(this, 'beat', beat);
+		makeReadOnlyProperty(this, 'tone', tone);
 	}
 
-	get beat() { return this._beat(); }
-	get tone() { return this._tone(); }
+	static fromJSON(json, tonesByFrequency) {
+		let obj = JSON.parse(json);
 
-	play() {
-		this.tone.play();
+		return new Note(obj.beat, tonesByFrequency[obj.frequency]);
 	}
 
 	toJSON() {
 		return {
 			beat: this.beat,
-			tone: this.tone
+			frequency: this.tone.frequency
 		};
 	}
 }

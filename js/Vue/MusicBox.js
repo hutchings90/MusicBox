@@ -1,5 +1,5 @@
 Vue.component('music-box', {
-	props: [ 'stream', 'audioContext' ],
+	props: [ 'audioContext' ],
 	template: `<div class='music-box'>
 		<music-box-controls
 			@set-tempo=setTempo
@@ -15,16 +15,13 @@ Vue.component('music-box', {
 			:tempo=tempo
 			:tempo-multiplier=tempoMultiplier
 			:playing=playing
-			:no-notes=noNotes></music-box-controls>
+			:no-notes=noActiveNotes></music-box-controls>
 		<music-box-editor
-			@add-note=addNote
-			@remove-note=removeNote
 			@right-mouse-move=rightMouseMove
 			:beat=beat
-			:notes=notes
+			:instruments=activeInstruments
 			:playing=playing
 			:auto-progress=autoProgress
-			:stream=stream
 			:audio-context=audioContext></music-box-editor>
 	</div>`,
 	data() {
@@ -36,24 +33,18 @@ Vue.component('music-box', {
 			updateIntervalTempo: false,
 			playing: false,
 			autoProgress: false,
-			notes: []
+			instruments: [],
+			promptingForInstrument: false
 		};
 	},
 	computed: {
 		intervalFrequency() { return 1000 / ((this.tempo * this.tempoMultiplier) / 60); },
 		interval() { return this.playing ? setInterval(() => this.doBeat(this.deltaBeat), this.intervalFrequency) : null; },
-		notesByBeat() {
-			return this.notes.reduce((reduction, note) => {
-				if (!reduction[note.beat]) reduction[note.beat] = [];
-
-				reduction[note.beat].push(note);
-
-				return reduction;
-			}, {});
-		},
-		beatNotes() { return this.notesByBeat[this.beat] || []; },
+		notes() { return this.instruments.reduce((reduction, instrument) => reduction.concat(instrument.notes), []); },
 		maxBeat() { return Math.max(0, ...this.notes.map(note => note.beat)); },
-		noNotes() { return this.notes.length < 1; }
+		activeInstruments() { return this.instruments; },
+		activeInstrument() { return this.instruments[0]; },
+		noActiveNotes() { return !this.activeInstruments.find(instrument => instrument.notes.length > 0); }
 	},
 	watch: {
 		tempo() {
@@ -76,6 +67,9 @@ Vue.component('music-box', {
 		},
 		notes() {
 			this.autoProgress = false;
+		},
+		audioContext() {
+			this.promptForInstrument();
 		}
 	},
 	methods: {
@@ -92,7 +86,7 @@ Vue.component('music-box', {
 			this.autoProgress = true;
 		},
 		playBeat() {
-			this.beatNotes.forEach(note => note.play());
+			this.activeInstruments.forEach(instrument => instrument.playBeat(this.beat));
 		},
 		pause() {
 			this.playing = false;
@@ -143,12 +137,6 @@ Vue.component('music-box', {
 			this.autoProgress = true;
 			this.beat = beat;
 		},
-		addNote(note) {
-			this.notes.push(note);
-		},
-		removeNote(noteToRemove) {
-			this.notes = this.notes.filter(note => note != noteToRemove);
-		},
 		rightMouseMove() {
 			this.autoProgress = false;
 		},
@@ -156,11 +144,15 @@ Vue.component('music-box', {
 			let link = document.createElement('a');
 
 			link.download = 'temp.json';
-			link.href = URL.createObjectURL(new Blob([ JSON.stringify(this.notes) ], {
+			link.href = URL.createObjectURL(new Blob([ JSON.stringify(this.instruments) ], {
 				type: 'text/plain;charset=utf-8'
 			}));
 
 			link.click();
+		},
+		promptForInstrument() {
+			this.promptingForInstrument = true;
+			this.instruments.push(new SineInstrument(this.audioContext));
 		}
 	}
 });

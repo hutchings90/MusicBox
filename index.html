@@ -5,18 +5,25 @@
 
 	<link rel='stylesheet' type='text/css' href='css/styles.css'>
 
+	<script src='js/header.js'></script>
 	<script src='js/Vue/vue.js'></script>
 </head>
 <body>
 	<div id='music-box-app'>
-		<music-box
-			:stream=stream
-			:audio-context=audioContext></music-box>
+		<music-box :audio-context=audioContext></music-box>
 	</div>
 
+	<!-- Tones -->
 	<script src='js/Models/Tone.js'></script>
+
+	<!-- Notes -->
 	<script src='js/Models/Note.js'></script>
 
+	<!-- Instruments -->
+	<script src='js/Models/Instrument.js'></script>
+	<script src='js/Models/Instruments/SineInstrument.js'></script>
+
+	<!-- Components -->
 	<script src='js/Vue/MusicBoxTempoControls.js'></script>
 	<script src='js/Vue/MusicBoxPlayerControls.js'></script>
 	<script src='js/Vue/MusicBoxControls.js'></script>

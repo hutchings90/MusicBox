@@ -1,16 +1,18 @@
 Vue.component('music-box-editor-row', {
-	props: [ 'scrollX', 'hoveringOverEditor', 'newNoteMarkerBeat', 'beat', 'tone', 'notes', 'playing', 'xToBeat', 'beatToX' ],
+	props: [ 'scrollX', 'hoveringOverEditor', 'newNoteMarkerBeat', 'beat', 'tone', 'instruments', 'playing', 'xToBeat', 'beatToX' ],
 	template: `<tr>
 		<th @mouseenter=onMouseEnterTones :class=toneClass v-text=toneNamesDisplay></th>
 		<td @click=rowClicked @mouseenter=onMouseEnterNotes @mousemove='onmousemove($event)' @mouseleave='onmouseleave' class='music-box-editor-score'>
 			<div v-show=hoveringOverEditor :style=newNoteColumnMarkerStyle class='new-note-column-marker'></div>
 			<div :style=scoreMarkerStyle class='beat-marker'></div>
 			<div v-show=hovering :style=newNoteMarkerStyle class='new-note-marker'></div>
-			<div class='note'
-				v-for='note in notesForTone(tone)'
-				@click='removeNote($event, note)'
-				@mousemove='onmousemoveNote(note)'
-				:style='noteStyle(note)'></div>
+			<template v-for='instrument in instruments'>
+				<div class='note'
+					v-for='note in instrument.getNotesForTone(tone)'
+					@click='removeNote($event, instrument, note)'
+					@mousemove='onmousemoveNote(note)'
+					:style='noteStyle(note)'></div>
+			</template>
 		</td>
 	</tr>`,
 	data() {
@@ -66,17 +68,14 @@ Vue.component('music-box-editor-row', {
 		scrollableEditorItemStyle(beat) {
 			return this.editorItemStyle(this.scrollBeat + beat);
 		},
-		notesForTone(tone) {
-			return this.notesByFrequency[tone.frequency] || [];
-		},
 		addNote(beat) {
-			this.$emit('add-note', new Note(beat, this.tone));
+			if (this.instruments.length == 1) this.instruments[0].addNote(new Note(beat, this.tone));
 		},
-		removeNote(ev, note) {
+		removeNote(ev, instrument, note) {
 			ev.preventDefault(note);
 			ev.stopPropagation(note);
 
-			this.$emit('remove-note', note);
+			instrument.removeNote(note);
 		},
 		onmousemove(ev) {
 			let x;
