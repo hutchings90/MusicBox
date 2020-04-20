@@ -10,6 +10,8 @@ Vue.component('music-box', {
 			@fast-step=fastStep
 			@go-to-beginning=goToBeginning
 			@go-to-end=goToEnd
+			@export-music=exportMusic
+			@import-music=importMusic
 			:beat=beat
 			:delta-beat=deltaBeat
 			:tempo=tempo
@@ -19,6 +21,7 @@ Vue.component('music-box', {
 		<music-box-editor
 			@right-mouse-move=rightMouseMove
 			:beat=beat
+			:tones=tones
 			:instruments=activeInstruments
 			:playing=playing
 			:auto-progress=autoProgress
@@ -38,14 +41,53 @@ Vue.component('music-box', {
 		};
 	},
 	computed: {
+		instrumentFactory() { return new InstrumentFactory(); },
 		intervalFrequency() { return 1000 / ((this.tempo * this.tempoMultiplier) / 60); },
 		interval() { return this.playing ? setInterval(() => this.doBeat(this.deltaBeat), this.intervalFrequency) : null; },
+		tones() { return this.audioContext ? [...Tone.TONES].reverse() : []; },
+		tonesByFrequency() {
+			return this.tones.reduce((reduction, tone) => {
+				let frequency = tone.frequency;
+
+				if (!reduction[frequency]) reduction[frequency] = [];
+
+				reduction[frequency] = tone;
+
+				return reduction;
+			}, {});
+		},
 		notes() { return this.instruments.reduce((reduction, instrument) => reduction.concat(instrument.notes), []); },
 		beatNoteCount() { return this.notes.filter(note => note.beat == this.beat).length; },
 		maxBeat() { return Math.max(0, ...this.notes.map(note => note.beat)); },
 		activeInstruments() { return this.instruments; },
 		activeInstrument() { return this.instruments[0]; },
-		noActiveNotes() { return !this.activeInstruments.find(instrument => instrument.notes.length > 0); }
+		noActiveNotes() { return !this.activeInstruments.find(instrument => instrument.notes.length > 0); },
+		exportBlob() {
+			return new Blob([ JSON.stringify({
+				tempo: this.tempo,
+				instruments: this.instruments
+			})], {
+				type: 'text/plain;charset=utf-8'
+			});
+		},
+		exportUrl() { return URL.createObjectURL(this.exportBlob); },
+		exportLink() {
+			let link = document.createElement('a');
+
+			link.download = 'temp.json';
+
+			return link;
+		},
+		importInput() {
+			let input = document.createElement('input');
+
+			input.type = 'file';
+			input.accept = 'application/JSON';
+			input.onchange = () => this.getImportedJSON();
+
+			return input;
+		},
+		fileReader() { return new FileReader(); }
 	},
 	watch: {
 		tempo() {
@@ -87,7 +129,7 @@ Vue.component('music-box', {
 			this.autoProgress = true;
 		},
 		playBeat() {
-			this.activeInstruments.forEach(instrument => instrument.getNotesForBeat(this.beat).forEach(note => note.play(instrument.type, this.beatNoteCount)));
+			this.activeInstruments.forEach(instrument => instrument.playBeat(this.beat, this.beatNoteCount));
 		},
 		pause() {
 			this.playing = false;
@@ -141,19 +183,33 @@ Vue.component('music-box', {
 		rightMouseMove() {
 			this.autoProgress = false;
 		},
-		exportNotes() {
-			let link = document.createElement('a');
-
-			link.download = 'temp.json';
-			link.href = URL.createObjectURL(new Blob([ JSON.stringify(this.instruments) ], {
-				type: 'text/plain;charset=utf-8'
-			}));
-
-			link.click();
+		exportMusic() {
+			this.exportLink.href = this.exportUrl;
+			this.exportLink.click();
+		},
+		importMusic() {
+			this.importInput.click();
 		},
 		promptForInstrument() {
 			this.promptingForInstrument = true;
-			this.instruments.push(new SineInstrument());
+			this.instruments.push(this.instrumentFactory.makeInstrument('music_box'));
+		},
+		getImportedJSON() {
+			if (this.importInput.files.length < 1) return;
+
+			this.stop();
+
+			this.fileReader.onload = () => this.parseImportedJSON();
+
+			this.fileReader.readAsText(this.importInput.files[0]);
+		},
+		parseImportedJSON() {
+			let data = JSON.parse(this.fileReader.result);
+
+			this.instruments = data.instruments.map(instrument => Instrument.fromObject(instrument, this.tonesByFrequency, this.audioContext));
+			this.tempo = data.tempo;
+
+			this.importInput.value = '';
 		}
 	}
 });

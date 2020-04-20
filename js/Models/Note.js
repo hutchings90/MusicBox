@@ -21,10 +21,8 @@ class Note {
 		if (this.tone.frequency < 20) setInterval(() => console.log(this.gainNode.gain.value));
 	}
 
-	static fromJSON(json, tonesByFrequency) {
-		let obj = JSON.parse(json);
-
-		return new Note(obj.beat, tonesByFrequency[obj.frequency]);
+	static fromObject(obj, tonesByFrequency, audioContext) {
+		return new Note(obj.beat, tonesByFrequency[obj.frequency], audioContext);
 	}
 
 	get decibel() { return Note.dBFSToGain(this.tone.frequency); }

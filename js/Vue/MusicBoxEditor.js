@@ -1,5 +1,5 @@
 Vue.component('music-box-editor', {
-	props: [ 'beat', 'instruments', 'playing', 'autoProgress', 'audioContext' ],
+	props: [ 'beat', 'tones', 'instruments', 'playing', 'autoProgress', 'audioContext' ],
 	template: `<table class='music-box-editor'>
 		<tbody ref=editor @mousedown.right=onRightClickDown @mouseup.right=onRightClickUp @contextmenu.prevent @mouseenter=mouseEnter @mousemove=onMouseMove @mouseleave=mouseLeave>
 			<music-box-editor-row
@@ -14,7 +14,9 @@ Vue.component('music-box-editor', {
 				:new-note-marker-beat=newNoteMarkerBeat
 				:beat=beat
 				:tone=tone
+				:playing=playing
 				:instruments=instruments
+				:notes-by-frequency=notesByFrequency
 				:audio-context=audioContext
 				:x-to-beat=xToBeat
 				:beat-to-x=beatToX></music-box-editor-row>
@@ -32,10 +34,19 @@ Vue.component('music-box-editor', {
 	},
 	computed: {
 		noteWidth() { return 10; },
-		tones() {
-			return this.audioContext ? [...Tone.TONES].reverse() : [];
-		},
-		beatX() { return this.beatToX(this.beat); }
+		beatX() { return this.beatToX(this.beat); },
+		notes() { return this.instruments.reduce((reduction, instrument) => reduction.concat(instrument.notes), []); },
+		notesByFrequency() {
+			return this.notes.reduce((reduction, note) => {
+				let frequency = note.tone.frequency;
+
+				if (!reduction[frequency]) reduction[frequency] = [];
+
+				reduction[frequency].push(note);
+
+				return reduction;
+			}, {});
+		}
 	},
 	watch: {
 		scrollX() {

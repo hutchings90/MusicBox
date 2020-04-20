@@ -17,7 +17,10 @@ Vue.component('music-box-controls', {
 			:tempo-multiplier=tempoMultiplier
 			:playing=playing
 			:no-notes=noNotes></music-box-player-controls>
-		<div class='music-box-controls-spacer'></div>
+		<div class='music-box-controls-spacer'>
+			<button @click=exportMusic>Export</button>
+			<button @click=importMusic>Import</button>
+		</div>
 	</div>`,
 	methods: {
 		setTempo(tempo) {
@@ -43,6 +46,12 @@ Vue.component('music-box-controls', {
 		},
 		goToEnd() {
 			this.$emit('go-to-end');
+		},
+		exportMusic() {
+			this.$emit('export-music');
+		},
+		importMusic() {
+			this.$emit('import-music');
 		}
 	}
 });

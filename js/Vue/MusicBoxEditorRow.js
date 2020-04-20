@@ -1,17 +1,22 @@
 Vue.component('music-box-editor-row', {
-	props: [ 'scrollX', 'hoveringOverEditor', 'newNoteMarkerBeat', 'beat', 'tone', 'instruments', 'audioContext', 'xToBeat', 'beatToX' ],
-	template: `<tr>
-		<th @mouseenter=onMouseEnterTones :class=toneClass v-text=toneNamesDisplay></th>
+	props: [ 'scrollX', 'hoveringOverEditor', 'newNoteMarkerBeat', 'beat', 'tone', 'playing', 'instruments', 'notesByFrequency', 'audioContext', 'xToBeat', 'beatToX' ],
+	template: `<tr :class=classObject>
+		<th @mouseenter=onMouseEnterTones class='music-box-editor-tone' v-text=toneNamesDisplay></th>
 		<td @click=rowClicked @mouseenter=onMouseEnterNotes @mousemove='onmousemove($event)' @mouseleave='onmouseleave' class='music-box-editor-score'>
 			<div v-show=hoveringOverEditor :style=newNoteColumnMarkerStyle class='new-note-column-marker'></div>
 			<div :style=scoreMarkerStyle class='beat-marker'></div>
 			<div v-show=hovering :style=newNoteMarkerStyle class='new-note-marker'></div>
 			<template v-for='instrument in instruments'>
-				<div class='note'
-					v-for='note in instrument.getNotesForTone(tone)'
-					@click='removeNote($event, instrument, note)'
-					@mousemove='onmousemoveNote(note)'
-					:style='noteStyle(note)'></div>
+				<music-box-editor-note
+					v-for='(note, i) in instrument.getNotesForTone(tone)'
+					@clicked='noteClicked'
+					@mousemoved='onmousemoveNote'
+					:key=i
+					:note=note
+					:instrument=instrument
+					:beat=beat
+					:playing=playing
+					:style-computer='noteStyle'></music-box-editor-note>
 			</template>
 		</td>
 	</tr>`,
@@ -26,9 +31,10 @@ Vue.component('music-box-editor-row', {
 		isC() { return RegExp(/C[0-9]/).test(this.toneNamesDisplay); },
 		isMiddleC() { return this.toneNamesDisplay == 'C4'; },
 		isStandardA() { return this.toneNamesDisplay == 'A4'; },
-		toneClass() {
+		classObject() {
 			return {
-				'music-box-editor-tone': true,
+				'music-box-editor-row': true,
+				'being-played': this.isBeingPlayed,
 				c: this.isC && !this.isMiddleC,
 				c4: this.isMiddleC,
 				a4: this.isStandardA
@@ -38,15 +44,8 @@ Vue.component('music-box-editor-row', {
 		scoreMarkerStyle() { return this.scrollableEditorItemStyle(this.beat); },
 		newNoteMarkerStyle() { return this.editorItemStyle(this.newNoteMarkerBeat); },
 		scrollBeat() { return this.xToBeat(this.scrollX); },
-		notesByFrequency() {
-			return this.notes.reduce((reduction, note) => {
-				if (!reduction[note.tone.frequency]) reduction[note.tone.frequency] = [];
-
-				reduction[note.tone.frequency].push(note);
-
-				return reduction;
-			}, {});
-		}
+		notes() { return this.notesByFrequency[this.tone.frequency] || []; },
+		isBeingPlayed() { return this.playing && this.notes.find(note => note.beat == this.beat); }
 	},
 	watch: {
 		mouseX() {
@@ -71,18 +70,21 @@ Vue.component('music-box-editor-row', {
 		addNote(beat) {
 			if (this.instruments.length == 1) this.instruments[0].addNote(new Note(beat, this.tone, this.audioContext));
 		},
-		removeNote(ev, instrument, note) {
-			ev.preventDefault(note);
-			ev.stopPropagation(note);
-
+		removeNote(instrument, note) {
 			instrument.removeNote(note);
+		},
+		noteClicked(data) {
+			data.ev.preventDefault();
+			data.ev.stopPropagation();
+
+			this.removeNote(data.instrument, data.note);
 		},
 		onmousemove(ev) {
 			let x;
 
 			switch (ev.target.className) {
 			case 'beat-marker':
-			case 'note': 
+			case 'music-box-editor-note': 
 			case 'new-note-column-marker':
 				let left = ev.target.style.left;
 
