@@ -41,6 +41,7 @@ Vue.component('music-box', {
 		intervalFrequency() { return 1000 / ((this.tempo * this.tempoMultiplier) / 60); },
 		interval() { return this.playing ? setInterval(() => this.doBeat(this.deltaBeat), this.intervalFrequency) : null; },
 		notes() { return this.instruments.reduce((reduction, instrument) => reduction.concat(instrument.notes), []); },
+		beatNoteCount() { return this.notes.filter(note => note.beat == this.beat).length; },
 		maxBeat() { return Math.max(0, ...this.notes.map(note => note.beat)); },
 		activeInstruments() { return this.instruments; },
 		activeInstrument() { return this.instruments[0]; },
@@ -86,7 +87,7 @@ Vue.component('music-box', {
 			this.autoProgress = true;
 		},
 		playBeat() {
-			this.activeInstruments.forEach(instrument => instrument.playBeat(this.beat));
+			this.activeInstruments.forEach(instrument => instrument.getNotesForBeat(this.beat).forEach(note => note.play(instrument.type, this.beatNoteCount)));
 		},
 		pause() {
 			this.playing = false;
@@ -152,7 +153,7 @@ Vue.component('music-box', {
 		},
 		promptForInstrument() {
 			this.promptingForInstrument = true;
-			this.instruments.push(new SineInstrument(this.audioContext));
+			this.instruments.push(new SineInstrument());
 		}
 	}
 });

@@ -1,5 +1,5 @@
 Vue.component('music-box-editor-row', {
-	props: [ 'scrollX', 'hoveringOverEditor', 'newNoteMarkerBeat', 'beat', 'tone', 'instruments', 'playing', 'xToBeat', 'beatToX' ],
+	props: [ 'scrollX', 'hoveringOverEditor', 'newNoteMarkerBeat', 'beat', 'tone', 'instruments', 'audioContext', 'xToBeat', 'beatToX' ],
 	template: `<tr>
 		<th @mouseenter=onMouseEnterTones :class=toneClass v-text=toneNamesDisplay></th>
 		<td @click=rowClicked @mouseenter=onMouseEnterNotes @mousemove='onmousemove($event)' @mouseleave='onmouseleave' class='music-box-editor-score'>
@@ -69,7 +69,7 @@ Vue.component('music-box-editor-row', {
 			return this.editorItemStyle(this.scrollBeat + beat);
 		},
 		addNote(beat) {
-			if (this.instruments.length == 1) this.instruments[0].addNote(new Note(beat, this.tone));
+			if (this.instruments.length == 1) this.instruments[0].addNote(new Note(beat, this.tone, this.audioContext));
 		},
 		removeNote(ev, instrument, note) {
 			ev.preventDefault(note);
