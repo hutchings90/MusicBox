@@ -1,5 +1,26 @@
 Vue.component('music-box-editor-note', {
-	props: [ 'note', 'instrument', 'beat', 'playing', 'styleComputer' ],
+	props: {
+		note: {
+			type: Note,
+			required: true
+		},
+		part: {
+			type: Part,
+			required: true
+		},
+		tick: {
+			type: Number,
+			required: true
+		},
+		playing: {
+			type: Boolean,
+			required: true
+		},
+		styleComputer: {
+			type: Function,
+			required: true
+		}
+	},
 	template: `<div @click=clicked @mousemove=mousemoved :class=classObject :style=styleObject></div>`,
 	computed: {
 		classObject() {
@@ -9,13 +30,13 @@ Vue.component('music-box-editor-note', {
 			};
 		},
 		styleObject() { return this.styleComputer(this.note); },
-		isBeingPlayed() { return this.playing && this.beat == this.note.beat; }
+		isBeingPlayed() { return this.playing && this.tick == this.note.tick; }
 	},
 	methods: {
 		clicked(ev) {
 			this.$emit('clicked', {
 				ev: ev,
-				instrument: this.instrument,
+				part: this.part,
 				note: this.note
 			});
 		},

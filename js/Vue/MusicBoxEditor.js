@@ -1,5 +1,30 @@
 Vue.component('music-box-editor', {
-	props: [ 'beat', 'tones', 'instruments', 'playing', 'autoProgress', 'audioContext' ],
+	props: {
+		tick: {
+			type: Number,
+			required: true
+		},
+		tones: {
+			type: Array,
+			required: true
+		},
+		parts: {
+			type: Array,
+			required: true
+		},
+		playing: {
+			type: Boolean,
+			required: true
+		},
+		autoProgress: {
+			type: Boolean,
+			required: true
+		},
+		audioContext: {
+			type: AudioContext,
+			required: true
+		}
+	},
 	template: `<table class='music-box-editor'>
 		<tbody ref=editor @mousedown.right=onRightClickDown @mouseup.right=onRightClickUp @contextmenu.prevent @mouseenter=mouseEnter @mousemove=onMouseMove @mouseleave=mouseLeave>
 			<music-box-editor-row
@@ -11,15 +36,15 @@ Vue.component('music-box-editor', {
 				:key=i
 				:scroll-x=scrollX
 				:hovering-over-editor=hovering
-				:new-note-marker-beat=newNoteMarkerBeat
-				:beat=beat
+				:new-note-marker-tick=newNoteMarkerTick
+				:tick=tick
 				:tone=tone
 				:playing=playing
-				:instruments=instruments
+				:parts=parts
 				:notes-by-frequency=notesByFrequency
 				:audio-context=audioContext
-				:x-to-beat=xToBeat
-				:beat-to-x=beatToX></music-box-editor-row>
+				:x-to-tick=xToTick
+				:tick-to-x=tickToX></music-box-editor-row>
 			</music-box-editor-row>
 		</tbody>
 	</table>`,
@@ -29,13 +54,13 @@ Vue.component('music-box-editor', {
 			rightClickDownX: 0,
 			rightClickDownScrollX: 0,
 			hovering: false,
-			newNoteMarkerBeat: 0
+			newNoteMarkerTick: 0
 		};
 	},
 	computed: {
 		noteWidth() { return 10; },
-		beatX() { return this.beatToX(this.beat); },
-		notes() { return this.instruments.reduce((reduction, instrument) => reduction.concat(instrument.notes), []); },
+		tickX() { return this.tickToX(this.tick); },
+		notes() { return this.parts.reduce((reduction, part) => reduction.concat(part.notes), []); },
 		notesByFrequency() {
 			return this.notes.reduce((reduction, note) => {
 				let frequency = note.tone.frequency;
@@ -52,7 +77,7 @@ Vue.component('music-box-editor', {
 		scrollX() {
 			if (this.scrollX > 0) this.scrollX = 0;
 		},
-		beatX() {
+		tickX() {
 			this.progress();
 		},
 		hovering() {
@@ -60,10 +85,10 @@ Vue.component('music-box-editor', {
 		}
 	},
 	methods: {
-		beatToX(beat) {
-			return beat * this.noteWidth;
+		tickToX(tick) {
+			return tick * this.noteWidth;
 		},
-		xToBeat(x) {
+		xToTick(x) {
 			return Math.floor(x / this.noteWidth);
 		},
 		moveScrollX(dx) {
@@ -98,16 +123,16 @@ Vue.component('music-box-editor', {
 		mouseLeave() {
 			this.endHover();
 		},
-		movedNewNoteMarker(newNoteMarkerBeat) {
-			this.newNoteMarkerBeat = newNoteMarkerBeat;
+		movedNewNoteMarker(newNoteMarkerTick) {
+			this.newNoteMarkerTick = newNoteMarkerTick;
 		},
 		progress() {
 			if (!this.autoProgress) return;
 
-			let diff = this.beatX + this.scrollX;
+			let diff = this.tickX + this.scrollX;
 
 			if (diff < 0) this.scrollX = 0;
-			else if (diff + this.noteWidth > this.$refs.editor.rows[0].children[1].offsetWidth) this.scrollX = -this.beatX;
+			else if (diff + this.noteWidth > this.$refs.editor.rows[0].children[1].offsetWidth) this.scrollX = -this.tickX;
 		}
 	}
 });

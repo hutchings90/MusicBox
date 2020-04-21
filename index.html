@@ -10,13 +10,14 @@
 </head>
 <body>
 	<div id='music-box-app'>
-		<music-box :audio-context=audioContext></music-box>
+		<music-box v-if=audioContext :audio-context=audioContext></music-box>
 	</div>
 
 	<!-- Models -->
 	<script src='js/Models/Tone.js'></script>
 	<script src='js/Models/Note.js'></script>
 	<script src='js/Models/Instrument.js'></script>
+	<script src='js/Models/Part.js'></script>
 
 	<!-- Factories -->
 	<script src='js/Factories/InstrumentFactory.js'></script>

@@ -1,20 +1,69 @@
 Vue.component('music-box-editor-row', {
-	props: [ 'scrollX', 'hoveringOverEditor', 'newNoteMarkerBeat', 'beat', 'tone', 'playing', 'instruments', 'notesByFrequency', 'audioContext', 'xToBeat', 'beatToX' ],
+	props: {
+		scrollX: {
+			type: Number,
+			required: true
+		},
+		hoveringOverEditor: {
+			type: Boolean,
+			required: true
+		},
+		newNoteMarkerTick: {
+			type: Number,
+			required: true
+		},
+		tick: {
+			type: Number,
+			required: true
+		},
+		tone: {
+			type: Tone,
+			required: true
+		},
+		playing: {
+			type: Boolean,
+			required: true
+		},
+		playing: {
+			type: Boolean,
+			required: true
+		},
+		parts: {
+			type: Array,
+			required: true
+		},
+		notesByFrequency: {
+			type: Object,
+			required: true
+		},
+		audioContext: {
+			type: AudioContext,
+			required: true
+		},
+		xToTick: {
+			type: Function,
+			required: true
+		},
+		tickToX: {
+			type: Function,
+			required: true
+		}
+	},
 	template: `<tr :class=classObject>
 		<th @mouseenter=onMouseEnterTones class='music-box-editor-tone' v-text=toneNamesDisplay></th>
 		<td @click=rowClicked @mouseenter=onMouseEnterNotes @mousemove='onmousemove($event)' @mouseleave='onmouseleave' class='music-box-editor-score'>
 			<div v-show=hoveringOverEditor :style=newNoteColumnMarkerStyle class='new-note-column-marker'></div>
-			<div :style=scoreMarkerStyle class='beat-marker'></div>
+			<div :style=scoreMarkerStyle class='tick-marker'></div>
 			<div v-show=hovering :style=newNoteMarkerStyle class='new-note-marker'></div>
-			<template v-for='instrument in instruments'>
+			<template v-for='part in parts'>
 				<music-box-editor-note
-					v-for='(note, i) in instrument.getNotesForTone(tone)'
+					v-for='(note, i) in part.getNotesForTone(tone)'
 					@clicked='noteClicked'
 					@mousemoved='onmousemoveNote'
 					:key=i
 					:note=note
-					:instrument=instrument
-					:beat=beat
+					:part=part
+					:tick=tick
 					:playing=playing
 					:style-computer='noteStyle'></music-box-editor-note>
 			</template>
@@ -40,16 +89,16 @@ Vue.component('music-box-editor-row', {
 				a4: this.isStandardA
 			};
 		},
-		newNoteColumnMarkerStyle() { return this.editorItemStyle(this.newNoteMarkerBeat); },
-		scoreMarkerStyle() { return this.scrollableEditorItemStyle(this.beat); },
-		newNoteMarkerStyle() { return this.editorItemStyle(this.newNoteMarkerBeat); },
-		scrollBeat() { return this.xToBeat(this.scrollX); },
+		newNoteColumnMarkerStyle() { return this.editorItemStyle(this.newNoteMarkerTick); },
+		scoreMarkerStyle() { return this.scrollableEditorItemStyle(this.tick); },
+		newNoteMarkerStyle() { return this.editorItemStyle(this.newNoteMarkerTick); },
+		scrollTick() { return this.xToTick(this.scrollX); },
 		notes() { return this.notesByFrequency[this.tone.frequency] || []; },
-		isBeingPlayed() { return this.playing && this.notes.find(note => note.beat == this.beat); }
+		isBeingPlayed() { return this.playing && this.notes.find(note => note.tick == this.tick); }
 	},
 	watch: {
 		mouseX() {
-			this.$emit('moved-new-note-marker', this.xToBeat(this.mouseX));
+			this.$emit('moved-new-note-marker', this.xToTick(this.mouseX));
 		}
 	},
 	methods: {
@@ -59,31 +108,31 @@ Vue.component('music-box-editor-row', {
 		onMouseEnterNotes() {
 			this.$emit('begin-hover');
 		},
-		editorItemStyle(beat) {
+		editorItemStyle(tick) {
 			return {
-				left: this.beatToX(beat) + 'px'
+				left: this.tickToX(tick) + 'px'
 			};
 		},
-		scrollableEditorItemStyle(beat) {
-			return this.editorItemStyle(this.scrollBeat + beat);
+		scrollableEditorItemStyle(tick) {
+			return this.editorItemStyle(this.scrollTick + tick);
 		},
-		addNote(beat) {
-			if (this.instruments.length == 1) this.instruments[0].addNote(new Note(beat, this.tone, this.audioContext));
+		addNote(tick) {
+			if (this.parts.length == 1) this.parts[0].addNote(new Note(tick, this.tone, this.audioContext));
 		},
-		removeNote(instrument, note) {
-			instrument.removeNote(note);
+		removeNote(part, note) {
+			part.removeNote(note);
 		},
 		noteClicked(data) {
 			data.ev.preventDefault();
 			data.ev.stopPropagation();
 
-			this.removeNote(data.instrument, data.note);
+			this.removeNote(data.part, data.note);
 		},
 		onmousemove(ev) {
 			let x;
 
 			switch (ev.target.className) {
-			case 'beat-marker':
+			case 'tick-marker':
 			case 'music-box-editor-note': 
 			case 'new-note-column-marker':
 				let left = ev.target.style.left;
@@ -98,7 +147,7 @@ Vue.component('music-box-editor-row', {
 			this.setMouseX(x);
 		},
 		onmousemoveNote(note) {
-			this.setMouseX(this.beatToX(note.beat));
+			this.setMouseX(this.tickToX(note.tick));
 		},
 		setMouseX(x) {
 			this.hovering = true;
@@ -108,10 +157,10 @@ Vue.component('music-box-editor-row', {
 			this.hovering = false;
 		},
 		noteStyle(note) {
-			return this.scrollableEditorItemStyle(note.beat);
+			return this.scrollableEditorItemStyle(note.tick);
 		},
 		rowClicked() {
-			this.addNote(this.newNoteMarkerBeat - this.scrollBeat);
+			this.addNote(this.newNoteMarkerTick - this.scrollTick);
 		}
 	}
 });

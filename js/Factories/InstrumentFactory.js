@@ -1,29 +1,27 @@
 class InstrumentFactory {
-	constructor() {}
-
-	makeInstrument(name) {
+	static makeInstrument(name) {
 		return this[name](name);
 	}
 
 	// Prepared Instruments
-	music_box(name) {
+	static music_box(name) {
 		return this.sine_instrument(name, true);
 	}
 
 	// Core Instruments
-	sine_instrument(name, multiNote) {
+	static sine_instrument(name, multiNote) {
 		return new Instrument(name, 'sine', multiNote);
 	}
 
-	square_instrument(name, multiNote) {
+	static square_instrument(name, multiNote) {
 		return new Instrument(name, 'square', multiNote);
 	}
 
-	sawtooth_instrument(name, multiNote) {
+	static sawtooth_instrument(name, multiNote) {
 		return new Instrument(name, 'sawtooth', multiNote);
 	}
 
-	triangle_instrument(name, multiNote) {
+	static triangle_instrument(name, multiNote) {
 		return new Instrument(name, 'triangle', multiNote);
 	}
 }

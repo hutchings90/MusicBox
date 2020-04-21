@@ -1,5 +1,26 @@
 Vue.component('music-box-player-controls', {
-	props: [ 'beat', 'deltaBeat', 'tempoMultiplier', 'playing', 'noNotes' ],
+	props: {
+		tick: {
+			type: Number,
+			required: true
+		},
+		deltaTick: {
+			type: Number,
+			required: true
+		},
+		tempoMultiplier: {
+			type: Number,
+			required: true
+		},
+		playing: {
+			type: Boolean,
+			required: true
+		},
+		noNotes: {
+			type: Boolean,
+			required: true
+		}
+	},
 	template: `<div class='music-box-player-controls'>
 		<button @click=goToBeginning>|<</button>
 		<button @click=backward><</button>
@@ -12,7 +33,7 @@ Vue.component('music-box-player-controls', {
 		<button @click=goToEnd>>|</button>
 	</div>`,
 	computed: {
-		disableStopButton() { return this.beat == 0 && !this.playing && this.tempoMultiplier == 1 && this.deltaBeat == 1; }
+		disableStopButton() { return this.tick == 0 && !this.playing && this.tempoMultiplier == 1 && this.deltaTick == 1; }
 	},
 	methods: {
 		play() {
@@ -36,11 +57,11 @@ Vue.component('music-box-player-controls', {
 		forward() {
 			this.step(1);
 		},
-		step(deltaBeat) {
-			this.$emit('step', deltaBeat);
+		step(deltaTick) {
+			this.$emit('step', deltaTick);
 		},
-		fastStep(deltaBeat, tempoMultiplier) {
-			this.$emit('fast-step', deltaBeat, tempoMultiplier);
+		fastStep(deltaTick, tempoMultiplier) {
+			this.$emit('fast-step', deltaTick, tempoMultiplier);
 		},
 		goToBeginning() {
 			this.$emit('go-to-beginning');

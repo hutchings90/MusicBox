@@ -19,9 +19,17 @@ body {
 	z-index: 1;
 }
 
+.music-box-controls > div {
+	vertical-align: middle;
+}
+
 .music-box-tempo-controls input {
 	border: 0;
 	width: 50px;
+}
+
+.music-box-tempo-controls > div {
+	display: inline-block;
 }
 
 .play-pause-button {
@@ -102,7 +110,7 @@ body {
 	top: 0;
 }
 
-.beat-marker {
+.tick-marker {
 	background: blue;
 	padding: -1px 0;
 }

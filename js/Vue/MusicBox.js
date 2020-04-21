@@ -1,8 +1,14 @@
 Vue.component('music-box', {
-	props: [ 'audioContext' ],
+	props: {
+		audioContext: {
+			type: AudioContext,
+			required: true
+		}
+	},
 	template: `<div class='music-box'>
 		<music-box-controls
 			@set-tempo=setTempo
+			@set-ticks-per-beat=setTicksPerBeat
 			@play=pressedPlay
 			@pause=pause
 			@stop=stop
@@ -12,38 +18,43 @@ Vue.component('music-box', {
 			@go-to-end=goToEnd
 			@export-music=exportMusic
 			@import-music=importMusic
-			:beat=beat
-			:delta-beat=deltaBeat
+			:tick=tick
+			:delta-tick=deltaTick
 			:tempo=tempo
+			:ticks-per-beat=ticksPerBeat
 			:tempo-multiplier=tempoMultiplier
 			:playing=playing
 			:no-notes=noActiveNotes></music-box-controls>
 		<music-box-editor
 			@right-mouse-move=rightMouseMove
-			:beat=beat
+			:tick=tick
 			:tones=tones
-			:instruments=activeInstruments
+			:parts=activeParts
 			:playing=playing
 			:auto-progress=autoProgress
 			:audio-context=audioContext></music-box-editor>
 	</div>`,
+	created() {
+		this.promptForInstrument();
+	},
 	data() {
 		return {
-			beat: 0,
-			deltaBeat: 1,
+			tick: 0,
+			deltaTick: 1,
 			tempo: 90,
+			ticksPerBeat: 1,
 			tempoMultiplier: 1,
-			updateIntervalTempo: false,
+			updateIntervalFrequency: false,
 			playing: false,
 			autoProgress: false,
-			instruments: [],
+			parts: [],
+			hasBegun: false,
 			promptingForInstrument: false
 		};
 	},
 	computed: {
-		instrumentFactory() { return new InstrumentFactory(); },
-		intervalFrequency() { return 1000 / ((this.tempo * this.tempoMultiplier) / 60); },
-		interval() { return this.playing ? setInterval(() => this.doBeat(this.deltaBeat), this.intervalFrequency) : null; },
+		intervalFrequency() { return 1 / (this.tempoMultiplier * this.tempo * this.ticksPerBeat / 60000); },
+		interval() { return this.playing ? setInterval(() => this.doTick(this.deltaTick), this.intervalFrequency) : null; },
 		tones() { return this.audioContext ? [...Tone.TONES].reverse() : []; },
 		tonesByFrequency() {
 			return this.tones.reduce((reduction, tone) => {
@@ -56,16 +67,17 @@ Vue.component('music-box', {
 				return reduction;
 			}, {});
 		},
-		notes() { return this.instruments.reduce((reduction, instrument) => reduction.concat(instrument.notes), []); },
-		beatNoteCount() { return this.notes.filter(note => note.beat == this.beat).length; },
-		maxBeat() { return Math.max(0, ...this.notes.map(note => note.beat)); },
-		activeInstruments() { return this.instruments; },
-		activeInstrument() { return this.instruments[0]; },
-		noActiveNotes() { return !this.activeInstruments.find(instrument => instrument.notes.length > 0); },
+		notes() { return this.parts.reduce((reduction, part) => reduction.concat(part.notes), []); },
+		tickNoteCount() { return this.notes.filter(note => note.tick == this.tick).length; },
+		maxTick() { return Math.max(0, ...this.notes.map(note => note.tick)); },
+		activeParts() { return this.parts; },
+		activePart() { return this.parts[0]; },
+		noActiveNotes() { return !this.activeParts.find(part => part.notes.length > 0); },
 		exportBlob() {
 			return new Blob([ JSON.stringify({
 				tempo: this.tempo,
-				instruments: this.instruments
+				ticksPerBeat: this.ticksPerBeat,
+				parts: this.parts
 			})], {
 				type: 'text/plain;charset=utf-8'
 			});
@@ -78,7 +90,7 @@ Vue.component('music-box', {
 
 			return link;
 		},
-		importInput() {
+		importElement() {
 			let input = document.createElement('input');
 
 			input.type = 'file';
@@ -91,36 +103,39 @@ Vue.component('music-box', {
 	},
 	watch: {
 		tempo() {
-			this.updateIntervalTempo = true;
+			this.updateIntervalFrequency = true;
+		},
+		ticksPerBeat() {
+			this.updateIntervalFrequency = true;
 		},
 		tempoMultiplier() {
-			this.updateIntervalTempo = true;
+			this.updateIntervalFrequency = true;
 		},
 		interval(newInterval, oldInterval) {
 			if (oldInterval) clearInterval(oldInterval);
 		},
-		beat() {
-			if (this.playing) this.playBeat();
+		tick() {
+			if (this.playing) this.playTick();
 		},
 		playing() {
-			if (this.playing) this.playBeat();
+			if (this.playing) this.playTick();
 		},
-		maxBeat() {
-			if (this.maxBeat < 1) this.stop();
+		maxTick() {
+			if (this.maxTick < 1) this.stop();
 		},
 		notes() {
 			this.autoProgress = false;
-		},
-		audioContext() {
-			this.promptForInstrument();
 		}
 	},
 	methods: {
 		setTempo(tempo) {
-			this.tempo = tempo;
+			this.tempo = Number(tempo);
+		},
+		setTicksPerBeat(ticksPerBeat) {
+			this.ticksPerBeat = Number(ticksPerBeat);
 		},
 		pressedPlay() {
-			this.deltaBeat = 1;
+			this.deltaTick = 1;
 			this.tempoMultiplier = 1;
 			this.play();
 		},
@@ -128,41 +143,41 @@ Vue.component('music-box', {
 			this.playing = true;
 			this.autoProgress = true;
 		},
-		playBeat() {
-			this.activeInstruments.forEach(instrument => instrument.playBeat(this.beat, this.beatNoteCount));
+		playTick() {
+			this.activeParts.forEach(instrument => instrument.playTick(this.tick, this.tickNoteCount));
 		},
 		pause() {
 			this.playing = false;
 		},
 		stop() {
 			this.pause();
-			this.beat = 0;
-			this.deltaBeat = 1;
+			this.tick = 0;
+			this.deltaTick = 1;
 			this.tempoMultiplier = 1;
 		},
-		doBeat(deltaBeat) {
-			let newBeat = this.beat + deltaBeat;
+		doTick(deltaTick) {
+			let newTick = this.tick + deltaTick;
 
-			if (newBeat > this.maxBeat) newBeat = 0;
-			else if (newBeat < 0) {
-				newBeat = 0;
-				this.deltaBeat = 1;
+			if (newTick > this.maxTick) newTick = 0;
+			else if (newTick < 0) {
+				newTick = 0;
+				this.deltaTick = 1;
 				this.tempoMultiplier = 1;
 				this.pause();
 			}
 
-			this.beat = newBeat;
+			this.tick = newTick;
 		},
-		step(deltaBeat) {
+		step(deltaTick) {
 			this.pause();
-			this.goToBeat(this.beat + deltaBeat);
-			this.playBeat();
+			this.goToTick(this.tick + deltaTick);
+			this.playTick();
 		},
-		fastStep(deltaBeat, tempoMultiplier) {
-			if (this.beat == 0 && deltaBeat < 0) return;
+		fastStep(deltaTick, tempoMultiplier) {
+			if (this.tick == 0 && deltaTick < 0) return;
 
-			if (this.deltaBeat != deltaBeat) {
-				this.deltaBeat = deltaBeat;
+			if (this.deltaTick != deltaTick) {
+				this.deltaTick = deltaTick;
 				this.tempoMultiplier = 8;
 			}
 
@@ -171,14 +186,17 @@ Vue.component('music-box', {
 			if (!this.playing) this.play();
 		},
 		goToBeginning() {
-			this.goToBeat(0);
+			this.goToTick(0);
 		},
 		goToEnd() {
-			this.goToBeat(this.maxBeat);
+			this.goToTick(this.maxTick);
 		},
-		goToBeat(beat) {
+		goToTick(tick) {
 			this.autoProgress = true;
-			this.beat = beat;
+			this.tick = tick;
+		},
+		cleanAudioNodes() {
+			this.parts.forEach(part => part.notes.forEach(note => note.cleanAudioNodes()));
 		},
 		rightMouseMove() {
 			this.autoProgress = false;
@@ -188,28 +206,30 @@ Vue.component('music-box', {
 			this.exportLink.click();
 		},
 		importMusic() {
-			this.importInput.click();
+			this.importElement.click();
 		},
 		promptForInstrument() {
 			this.promptingForInstrument = true;
-			this.instruments.push(this.instrumentFactory.makeInstrument('music_box'));
+			this.parts.push(new Part('music_box'));
 		},
 		getImportedJSON() {
-			if (this.importInput.files.length < 1) return;
+			if (this.importElement.files.length < 1) return;
 
 			this.stop();
+			this.cleanAudioNodes();
 
 			this.fileReader.onload = () => this.parseImportedJSON();
 
-			this.fileReader.readAsText(this.importInput.files[0]);
+			this.fileReader.readAsText(this.importElement.files[0]);
 		},
 		parseImportedJSON() {
 			let data = JSON.parse(this.fileReader.result);
 
-			this.instruments = data.instruments.map(instrument => Instrument.fromObject(instrument, this.tonesByFrequency, this.audioContext));
-			this.tempo = data.tempo;
+			this.parts = data.parts.map(part => Part.fromObject(part, this.tonesByFrequency, this.audioContext));
+			this.tempo = Number(data.tempo);
+			this.ticksPerBeat = Number(data.ticksPerBeat);
 
-			this.importInput.value = '';
+			this.importElement.value = '';
 		}
 	}
 });

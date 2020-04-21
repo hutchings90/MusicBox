@@ -3,8 +3,8 @@ class Note {
 		return Math.pow(10, -(dbfs * 2) / Tone.MAX_TONE);
 	}
 
-	constructor(beat, tone, audioContext) {
-		makeReadOnlyProperty(this, 'beat', beat);
+	constructor(tick, tone, audioContext) {
+		makeReadOnlyProperty(this, 'tick', tick);
 		makeReadOnlyProperty(this, 'tone', tone);
 		makeReadOnlyProperty(this, 'audioContext', audioContext);
 		makeReadOnlyProperty(this, 'oscillatorNode', this.audioContext.createOscillator());
@@ -17,19 +17,17 @@ class Note {
 		this.oscillatorNode.connect(this.gainNode);
 		this.gainNode.connect(this.audioContext.destination);
 		this.oscillatorNode.start();
-
-		if (this.tone.frequency < 20) setInterval(() => console.log(this.gainNode.gain.value));
 	}
 
 	static fromObject(obj, tonesByFrequency, audioContext) {
-		return new Note(obj.beat, tonesByFrequency[obj.frequency], audioContext);
+		return new Note(obj.tick, tonesByFrequency[obj.frequency], audioContext);
 	}
 
 	get decibel() { return Note.dBFSToGain(this.tone.frequency); }
 
 	toJSON() {
 		return {
-			beat: this.beat,
+			tick: this.tick,
 			frequency: this.tone.frequency
 		};
 	}
@@ -37,7 +35,13 @@ class Note {
 	play(type, noteCount) {
 		this.gainNode.gain.cancelScheduledValues(0);
 		this.oscillatorNode.type = type;
-		this.gainNode.gain.setTargetAtTime(this.decibel / (noteCount / 2), this.audioContext.currentTime + 0.06, 0.06);
+		this.gainNode.gain.setTargetAtTime(this.decibel / noteCount, this.audioContext.currentTime + 0.06, 0.06);
 		this.gainNode.gain.setTargetAtTime(0, this.audioContext.currentTime + 0.08, .15);
+	}
+
+	cleanAudioNodes() {
+		this.gainNode.disconnect();
+		this.oscillatorNode.disconnect();
+		this.oscillatorNode.stop();
 	}
 }
