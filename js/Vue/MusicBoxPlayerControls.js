@@ -22,15 +22,15 @@ Vue.component('music-box-player-controls', {
 		}
 	},
 	template: `<div class='music-box-player-controls'>
-		<button @click=goToBeginning>|<</button>
-		<button @click=backward><</button>
-		<button @click=fastBackward><<</button>
-		<button @click=pause v-if=playing class='play-pause-button'>Pause</button>
-		<button @click=play v-else :disabled=noNotes class='play-pause-button'>Play</button>
-		<button @click=stop :disabled=disableStopButton class='play-pause-button'>Stop</button>
-		<button @click=fastForward>>></button>
-		<button @click=forward>></button>
-		<button @click=goToEnd>>|</button>
+		<button @click=goToBeginning :disabled=noNotes>|<</button>
+		<button @click=backward :disabled=noNotes><</button>
+		<button @click=fastBackward :disabled=noNotes><<</button>
+		<button v-if=playing class='pause-button' @click=pause>Pause</button>
+		<button @click=play v-else :disabled=noNotes class='play-button'>Play</button>
+		<button @click=stop :disabled=disableStopButton class='stop-button'>Stop</button>
+		<button @click=fastForward :disabled=noNotes>>></button>
+		<button @click=forward :disabled=noNotes>></button>
+		<button @click=goToEnd :disabled=noNotes>>|</button>
 	</div>`,
 	computed: {
 		disableStopButton() { return this.tick == 0 && !this.playing && this.tempoMultiplier == 1 && this.deltaTick == 1; }

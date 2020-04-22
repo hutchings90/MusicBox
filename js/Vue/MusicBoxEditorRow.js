@@ -36,10 +36,6 @@ Vue.component('music-box-editor-row', {
 			type: Object,
 			required: true
 		},
-		audioContext: {
-			type: AudioContext,
-			required: true
-		},
 		xToTick: {
 			type: Function,
 			required: true
@@ -52,8 +48,8 @@ Vue.component('music-box-editor-row', {
 	template: `<tr :class=classObject>
 		<th @mouseenter=onMouseEnterTones class='music-box-editor-tone' v-text=toneNamesDisplay></th>
 		<td @click=rowClicked @mouseenter=onMouseEnterNotes @mousemove='onmousemove($event)' @mouseleave='onmouseleave' class='music-box-editor-score'>
-			<div v-show=hoveringOverEditor :style=newNoteColumnMarkerStyle class='new-note-column-marker'></div>
-			<div :style=scoreMarkerStyle class='tick-marker'></div>
+			<div v-show=hoveringOverEditor :style=newNoteTickMarkerStyle class='new-note-tick-marker'></div>
+			<div :style=tickMarkerStyle class='tick-marker'></div>
 			<div v-show=hovering :style=newNoteMarkerStyle class='new-note-marker'></div>
 			<template v-for='part in parts'>
 				<music-box-editor-note
@@ -89,8 +85,8 @@ Vue.component('music-box-editor-row', {
 				a4: this.isStandardA
 			};
 		},
-		newNoteColumnMarkerStyle() { return this.editorItemStyle(this.newNoteMarkerTick); },
-		scoreMarkerStyle() { return this.scrollableEditorItemStyle(this.tick); },
+		newNoteTickMarkerStyle() { return this.editorItemStyle(this.newNoteMarkerTick); },
+		tickMarkerStyle() { return this.scrollableEditorItemStyle(this.tick); },
 		newNoteMarkerStyle() { return this.editorItemStyle(this.newNoteMarkerTick); },
 		scrollTick() { return this.xToTick(this.scrollX); },
 		notes() { return this.notesByFrequency[this.tone.frequency] || []; },
@@ -117,7 +113,7 @@ Vue.component('music-box-editor-row', {
 			return this.editorItemStyle(this.scrollTick + tick);
 		},
 		addNote(tick) {
-			if (this.parts.length == 1) this.parts[0].addNote(new Note(tick, this.tone, this.audioContext));
+			if (this.parts.length == 1) this.parts[0].addNote(new Note(tick, this.tone));
 		},
 		removeNote(part, note) {
 			part.removeNote(note);
@@ -134,7 +130,7 @@ Vue.component('music-box-editor-row', {
 			switch (ev.target.className) {
 			case 'tick-marker':
 			case 'music-box-editor-note': 
-			case 'new-note-column-marker':
+			case 'new-note-tick-marker':
 				let left = ev.target.style.left;
 
 				x = Number(left.slice(0, left.length - 2));

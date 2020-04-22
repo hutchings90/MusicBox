@@ -1,27 +1,39 @@
 class InstrumentFactory {
-	static makeInstrument(name) {
-		return this[name](name);
+	static makeInstrument(name, audioContext) {
+		return this[name](audioContext, {
+			name: name
+		});
 	}
 
 	// Prepared Instruments
-	static music_box(name) {
-		return this.sine_instrument(name, true);
+	static music_box(audioContext, options) {
+		return this.sine_instrument(audioContext, Object.assign({
+			multiNote: true
+		}, options));
 	}
 
 	// Core Instruments
-	static sine_instrument(name, multiNote) {
-		return new Instrument(name, 'sine', multiNote);
+	static sine_instrument(audioContext, options) {
+		return new Instrument(audioContext, Object.assign({
+			oscillatorType: 'sine'
+		}, options));
 	}
 
-	static square_instrument(name, multiNote) {
-		return new Instrument(name, 'square', multiNote);
+	static square_instrument(audioContext, options) {
+		return new Instrument(audioContext, Object.assign({
+			oscillatorType: 'square'
+		}, options));
 	}
 
-	static sawtooth_instrument(name, multiNote) {
-		return new Instrument(name, 'sawtooth', multiNote);
+	static sawtooth_instrument(audioContext, options) {
+		return new Instrument(audioContext, Object.assign({
+			oscillatorType: 'sawtooth'
+		}, options));
 	}
 
-	static triangle_instrument(name, multiNote) {
-		return new Instrument(name, 'triangle', multiNote);
+	static triangle_instrument(audioContext, options) {
+		return new Instrument(audioContext, Object.assign({
+			oscillatorType: 'triangle'
+		}, options));
 	}
 }

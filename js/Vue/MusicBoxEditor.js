@@ -16,50 +16,69 @@ Vue.component('music-box-editor', {
 			type: Boolean,
 			required: true
 		},
+		maxTick: {
+			type: Number,
+			required: true
+		},
 		autoProgress: {
 			type: Boolean,
 			required: true
-		},
-		audioContext: {
-			type: AudioContext,
-			required: true
 		}
 	},
-	template: `<table class='music-box-editor'>
-		<tbody ref=editor @mousedown.right=onRightClickDown @mouseup.right=onRightClickUp @contextmenu.prevent @mouseenter=mouseEnter @mousemove=onMouseMove @mouseleave=mouseLeave>
-			<music-box-editor-row
-				v-for='(tone, i) in tones'
-				@move-scroll-x=moveScrollX
-				@end-hover=endHover
-				@begin-hover=beginHover
-				@moved-new-note-marker=movedNewNoteMarker
-				:key=i
-				:scroll-x=scrollX
-				:hovering-over-editor=hovering
-				:new-note-marker-tick=newNoteMarkerTick
-				:tick=tick
-				:tone=tone
-				:playing=playing
-				:parts=parts
-				:notes-by-frequency=notesByFrequency
-				:audio-context=audioContext
-				:x-to-tick=xToTick
-				:tick-to-x=tickToX></music-box-editor-row>
-			</music-box-editor-row>
-		</tbody>
-	</table>`,
+	template: `<div class='music-box-editor-container'>
+		<table class='music-box-editor'>
+			<tbody ref=editor @mousedown.right=onRightClickDown @mouseup.right=onRightClickUp @contextmenu.prevent @mouseenter=mouseEnter @mousemove=onMouseMove @mouseleave=mouseLeave>
+				<music-box-editor-row
+					v-for='(tone, i) in tones'
+					@end-hover=endHover
+					@begin-hover=beginHover
+					@moved-new-note-marker=movedNewNoteMarker
+					:key=i
+					:scroll-x=scrollCoords.x
+					:hovering-over-editor=hovering
+					:new-note-marker-tick=newNoteMarkerTick
+					:tick=tick
+					:tone=tone
+					:playing=playing
+					:parts=parts
+					:notes-by-frequency=notesByFrequency
+					:x-to-tick=xToTick
+					:tick-to-x=tickToX></music-box-editor-row>
+				</music-box-editor-row>
+			</tbody>
+		</table>
+	</div>`,
+	created() {
+		window.onscroll = () => this.scrollCoords.y = -document.scrollingElement.scrollTop;
+		window.onwheel = (ev) => {
+			if (ev.shiftKey) this.moveScrollCoords('x', this.tickToX(-3 * ev.deltaY / Math.abs(ev.deltaY)));
+		};
+	},
 	data() {
 		return {
-			scrollX: 0,
-			rightClickDownX: 0,
-			rightClickDownScrollX: 0,
+			scrollCoords: {
+				x: 0,
+				y: 0
+			},
+			rightClickDownCoords: {
+				x: 0,
+				y: 0
+			},
+			rightClickDownScrollCoords: {
+				x: 0,
+				y: 0
+			},
 			hovering: false,
-			newNoteMarkerTick: 0
+			newNoteMarkerTick: 0,
+			rightClickMovingPaused: true
 		};
 	},
 	computed: {
 		noteWidth() { return 10; },
+		scrollTickLead() { return 20; },
 		tickX() { return this.tickToX(this.tick); },
+		scrollTick() { return this.xToTick(this.scrollCoords.x); },
+		scrollTickDiff() { return this.tick + this.scrollTick; },
 		notes() { return this.parts.reduce((reduction, part) => reduction.concat(part.notes), []); },
 		notesByFrequency() {
 			return this.notes.reduce((reduction, note) => {
@@ -71,17 +90,34 @@ Vue.component('music-box-editor', {
 
 				return reduction;
 			}, {});
-		}
+		},
 	},
 	watch: {
-		scrollX() {
-			if (this.scrollX > 0) this.scrollX = 0;
+		'scrollCoords.x'() {
+			if (this.scrollCoords.x > 0) this.scrollCoords.x = 0;
 		},
-		tickX() {
-			this.progress();
+		'scrollCoords.y'() {
+			document.scrollingElement.scrollTop = -this.scrollCoords.y;
+
+			// If the user keeps scrolling past the scrolling element's limit,
+			// then the scrolling element's scrollTop stops at the limit, but
+			// scrollCoords.y keeps going.
+			if (this.scrollCoords.y != -document.scrollingElement.scrollTop) this.scrollCoords.y = -document.scrollingElement.scrollTop;
+		},
+		tick(newVal, oldVal) {
+			if (!this.autoProgress) return;
+
+			if (newVal > oldVal) {
+				let tickCount = this.xToTick(this.$refs.editor.rows[0].children[1].offsetWidth) - 1;
+				let diff = tickCount - this.scrollTickLead;
+
+				if (this.tick + this.scrollTick > diff) this.scrollCoords.x = -this.tickToX(Math.min(this.maxTick, this.tick + this.scrollTickLead) - tickCount);
+			}
+			else if (this.scrollTickDiff < this.scrollTickLead) this.scrollCoords.x = Math.min(0, -this.tickToX(this.tick - this.scrollTickLead));
 		},
 		hovering() {
-			if (!this.hovering) this.endRightClickMoving();
+			if (!this.hovering) this.pauseRightClickMoving();
+			else if (this.rightClickDownCoords.x != 0) this.continueRightClickMoving();
 		}
 	},
 	methods: {
@@ -91,8 +127,10 @@ Vue.component('music-box-editor', {
 		xToTick(x) {
 			return Math.floor(x / this.noteWidth);
 		},
-		moveScrollX(dx) {
-			this.scrollX += dx;
+		moveScrollCoords(axis, delta) {
+			this.scrollCoords[axis] += delta;
+
+			if (axis == 'x') this.$emit('x-axis-scroll');
 		},
 		endHover() {
 			this.hovering = false;
@@ -101,22 +139,33 @@ Vue.component('music-box-editor', {
 			this.hovering = true;
 		},
 		onRightClickDown(ev) {
-			this.rightClickDownX = ev.screenX;
-			this.rightClickDownScrollX = this.scrollX;
+			this.rightClickDownCoords.x = ev.screenX;
+			this.rightClickDownCoords.y = ev.screenY;
+			this.rightClickDownScrollCoords.x = this.scrollCoords.x;
+			this.rightClickDownScrollCoords.y = this.scrollCoords.y;
+			this.continueRightClickMoving();
 		},
 		onRightClickUp() {
 			this.endRightClickMoving();
 		},
 		endRightClickMoving() {
-			this.rightClickDownX = 0;
+			this.rightClickDownCoords.x = 0;
+			this.pauseRightClickMoving();
+		},
+		continueRightClickMoving() {
+			this.rightClickMovingPaused = false;
+		},
+		pauseRightClickMoving() {
+			this.rightClickMovingPaused = true;
 		},
 		mouseEnter() {
 			this.beginHover();
 		},
 		onMouseMove(ev) {
-			if (!this.rightClickDownX) return;
+			if (this.rightClickMovingPaused) return;
 
-			this.scrollX = this.rightClickDownScrollX - this.rightClickDownX + ev.screenX;
+			this.scrollCoords.x = this.rightClickDownScrollCoords.x - this.rightClickDownCoords.x + ev.screenX;
+			this.scrollCoords.y = this.rightClickDownScrollCoords.y - this.rightClickDownCoords.y + ev.screenY;
 
 			this.$emit('right-mouse-move');
 		},
@@ -125,14 +174,6 @@ Vue.component('music-box-editor', {
 		},
 		movedNewNoteMarker(newNoteMarkerTick) {
 			this.newNoteMarkerTick = newNoteMarkerTick;
-		},
-		progress() {
-			if (!this.autoProgress) return;
-
-			let diff = this.tickX + this.scrollX;
-
-			if (diff < 0) this.scrollX = 0;
-			else if (diff + this.noteWidth > this.$refs.editor.rows[0].children[1].offsetWidth) this.scrollX = -this.tickX;
 		}
 	}
 });

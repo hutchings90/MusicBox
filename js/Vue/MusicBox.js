@@ -26,15 +26,31 @@ Vue.component('music-box', {
 			:playing=playing
 			:no-notes=noActiveNotes></music-box-controls>
 		<music-box-editor
+			@x-axis-scroll=xAxisScroll
 			@right-mouse-move=rightMouseMove
 			:tick=tick
 			:tones=tones
 			:parts=activeParts
 			:playing=playing
-			:auto-progress=autoProgress
-			:audio-context=audioContext></music-box-editor>
+			:max-tick=maxTick
+			:auto-progress=autoProgress></music-box-editor>
 	</div>`,
 	created() {
+		window.onkeypress = (ev) => {
+			switch (ev.keyCode) {
+			case 106: this.step(-1); break; // 'J' key move backward one step
+			case 108: this.step(1); break; // 'L' key move forward one step
+			case 107: // 'K' key plays/pauses
+				if (this.playing) this.pause();
+				else if(this.hasActiveNotes) this.pressedPlay();
+				break;
+			default: return; // Ignore if anything else
+			}
+
+			ev.preventDefault();
+			ev.stopPropagation();
+		};
+
 		this.promptForInstrument();
 	},
 	data() {
@@ -53,7 +69,7 @@ Vue.component('music-box', {
 		};
 	},
 	computed: {
-		intervalFrequency() { return 1 / (this.tempoMultiplier * this.tempo * this.ticksPerBeat / 60000); },
+		intervalFrequency() { return 60000 / (this.tempoMultiplier * this.tempo * this.ticksPerBeat); },
 		interval() { return this.playing ? setInterval(() => this.doTick(this.deltaTick), this.intervalFrequency) : null; },
 		tones() { return this.audioContext ? [...Tone.TONES].reverse() : []; },
 		tonesByFrequency() {
@@ -72,7 +88,8 @@ Vue.component('music-box', {
 		maxTick() { return Math.max(0, ...this.notes.map(note => note.tick)); },
 		activeParts() { return this.parts; },
 		activePart() { return this.parts[0]; },
-		noActiveNotes() { return !this.activeParts.find(part => part.notes.length > 0); },
+		hasActiveNotes() { return Boolean(this.activeParts.find(part => part.notes.length > 0)); },
+		noActiveNotes() { return !this.hasActiveNotes; },
 		exportBlob() {
 			return new Blob([ JSON.stringify({
 				tempo: this.tempo,
@@ -115,10 +132,13 @@ Vue.component('music-box', {
 			if (oldInterval) clearInterval(oldInterval);
 		},
 		tick() {
-			if (this.playing) this.playTick();
+			if (this.tick < 0) this.tick = this.maxTick;
+			else if (this.tick > this.maxTick) this.tick = 0;
+			else if (this.playing) this.playTick();
 		},
 		playing() {
 			if (this.playing) this.playTick();
+			else this.pauseSound();
 		},
 		maxTick() {
 			if (this.maxTick < 1) this.stop();
@@ -144,7 +164,7 @@ Vue.component('music-box', {
 			this.autoProgress = true;
 		},
 		playTick() {
-			this.activeParts.forEach(instrument => instrument.playTick(this.tick, this.tickNoteCount));
+			this.activeParts.forEach(part => part.playTick(this.tick, this.tickNoteCount));
 		},
 		pause() {
 			this.playing = false;
@@ -169,12 +189,14 @@ Vue.component('music-box', {
 			this.tick = newTick;
 		},
 		step(deltaTick) {
+			if (this.noActiveNotes) return;
+
 			this.pause();
 			this.goToTick(this.tick + deltaTick);
 			this.playTick();
 		},
 		fastStep(deltaTick, tempoMultiplier) {
-			if (this.tick == 0 && deltaTick < 0) return;
+			if ((this.tick == 0 && deltaTick < 0) || this.noActiveNotes) return;
 
 			if (this.deltaTick != deltaTick) {
 				this.deltaTick = deltaTick;
@@ -195,8 +217,14 @@ Vue.component('music-box', {
 			this.autoProgress = true;
 			this.tick = tick;
 		},
+		pauseSound() {
+			this.parts.forEach(part => part.instrument.pauseSound());
+		},
 		cleanAudioNodes() {
-			this.parts.forEach(part => part.notes.forEach(note => note.cleanAudioNodes()));
+			this.parts.forEach(part => part.instrument.cleanAudioNodes());
+		},
+		xAxisScroll() {
+			this.autoProgress = false;
 		},
 		rightMouseMove() {
 			this.autoProgress = false;
@@ -210,7 +238,7 @@ Vue.component('music-box', {
 		},
 		promptForInstrument() {
 			this.promptingForInstrument = true;
-			this.parts.push(new Part('music_box'));
+			this.parts.push(new Part('music_box', this.audioContext));
 		},
 		getImportedJSON() {
 			if (this.importElement.files.length < 1) return;

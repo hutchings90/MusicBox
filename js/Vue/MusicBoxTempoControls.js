@@ -11,12 +11,12 @@ Vue.component('music-box-tempo-controls', {
 	},
 	template: `<div class='music-box-tempo-controls'>
 		<div>
-			<label>Tempo:</label>
+			<label>Tempo</label>
 			<input @change=setTempo v-model=tempoEditor type=number min=30/>
 		</div>
 
 		<div>
-			<label>Ticks Per Beat:</label>
+			<label>Ticks Per Beat</label>
 			<input @change=setTicksPerBeat v-model=ticksPerBeatEditor type=number min=1>
 		</div>
 	</div>`,

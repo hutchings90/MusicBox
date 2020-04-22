@@ -1,15 +1,15 @@
 class Part {
-	constructor(instrumentName) {
-		makeReadOnlyProperty(this, 'instrument', InstrumentFactory.makeInstrument(instrumentName));
+	constructor(instrumentName, audioContext) {
+		makeReadOnlyProperty(this, 'instrument', InstrumentFactory.makeInstrument(instrumentName, audioContext));
 
 		// Can't be read only because Vue loses reactivity.
 		this.notes = [];
 	}
 
 	static fromObject(obj, tonesByFrequency, audioContext) {
-		let part = new Part(obj.instrument.name);
+		let part = new Part(obj.instrument.name, audioContext);
 
-		obj.notes.forEach(note => part.addNote(Note.fromObject(note, tonesByFrequency, audioContext)));
+		obj.notes.forEach(note => part.addNote(Note.fromObject(note, tonesByFrequency)));
 
 		return part;
 	}
@@ -51,15 +51,18 @@ class Part {
 	}
 
 	addNote(note) {
-		if (this.instrument.multiNote || !this.hasNotesForTick(note.tick)) this.notes.push(note);
+		if (this.instrument.multiNote || !this.hasNotesForTick(note.tick)) {
+			this.notes.push(note);
+			this.instrument.addSounder(note.tone);
+		}
 	}
 
 	removeNote(note) {
 		this.notes.splice(this.notes.indexOf(note), 1);
 	}
 
-	playTick(tick, tickNoteCount) {
-		this.getNotesForTick(tick).forEach(note => note.play(this.instrument.oscillatorType, tickNoteCount));
+	playTick(tick, noteCount) {
+		this.getNotesForTick(tick).forEach(note => this.instrument.playNote(note, noteCount));
 	}
 
 	toJSON() {

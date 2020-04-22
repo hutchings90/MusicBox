@@ -6,16 +6,13 @@ body {
 	text-align: center;
 }
 
-.music-box {
-	margin: 0 5px;
-}
-
 .music-box-controls {
-	background: white;
+	background-image: radial-gradient(#ccc, #ddd);
 	text-align: center;
 	position: sticky;
 	top: 0;
 	padding: 5px 0;
+	border-bottom: 1px solid black;
 	z-index: 1;
 }
 
@@ -23,16 +20,46 @@ body {
 	vertical-align: middle;
 }
 
-.music-box-tempo-controls input {
-	border: 0;
-	width: 50px;
-}
-
 .music-box-tempo-controls > div {
 	display: inline-block;
+	text-align: left;
+	font-size: 12px;
 }
 
-.play-pause-button {
+.music-box-tempo-controls > div > label {
+	display: block;
+}
+
+.music-box-tempo-controls > div > input {
+	background: 0;
+	border: 0;
+	width: 50px;
+	border-radius: 5px;
+}
+
+.music-box-tempo-controls > div > input:hover, .music-box-tempo-controls > div > input:focus {
+	background: white;
+}
+
+.music-box-controls .pause-button:not(:disabled) {
+	background: purple;
+	border-color: purple;
+	color: white;
+}
+
+.music-box-controls .play-button:not(:disabled) {
+	background: green;
+	border-color: green;
+	color: white;
+}
+
+.music-box-controls .stop-button:not(:disabled) {
+	background: red;
+	border-color: red;
+	color: white;
+}
+
+.play-button, .pause-button, .stop-button {
 	width: 60px;
 }
 
@@ -44,13 +71,23 @@ body {
 	margin: 0 50px;
 }
 
-.music-box-editor {
-	font-size: 10px;
-	overflow: auto;
-	margin-bottom: 20px;
+.music-box-controls button {
+	background: #f4f4f4;
+	border-radius: 40%;
 }
 
-.music-box-editor th, .new-note-column-marker {
+.music-box-editor-container {
+	background: gray;
+	padding: 10px 10px 20px;
+}
+
+.music-box-editor {
+	background: #f8f8f8;
+	font-size: 10px;
+	overflow: auto;
+}
+
+.music-box-editor th, .new-note-tick-marker {
 	background: #ddd;
 }
 
@@ -65,11 +102,6 @@ body {
 .music-box-editor, .music-box-editor th, .music-box-editor td {
 	border: 1px solid black;
 	border-collapse: collapse;
-}
-
-.music-box-editor td {
-	border-bottom-style: dashed;
-	border-bottom-style: dashed;
 }
 
 .music-box-editor tbody td:nth-child(2) {
@@ -112,7 +144,6 @@ body {
 
 .tick-marker {
 	background: blue;
-	padding: -1px 0;
 }
 
 .music-box-editor-note {
