@@ -32,7 +32,7 @@ class Sounder {
 		this.gainNode.gain.setTargetAtTime(0, this.audioContext.currentTime + 0.06, .06);
 	}
 
-	cleanAudioNodes() {
+	killAudio() {
 		this.gainNode.disconnect();
 		this.oscillatorNode.disconnect();
 		this.oscillatorNode.stop();

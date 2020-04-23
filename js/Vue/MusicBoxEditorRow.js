@@ -137,7 +137,7 @@ Vue.component('music-box-editor-row', {
 
 				break;
 			case 'music-box-editor-score': x = ev.offsetX + 1; break;
-			default: x = this.mouseX; break;
+			default: return;
 			}
 
 			this.setMouseX(x);

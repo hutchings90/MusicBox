@@ -10,7 +10,18 @@
 </head>
 <body>
 	<div id='music-box-app'>
-		<music-box v-if=audioContext :audio-context=audioContext></music-box>
+		<music-box
+			v-if=audioContext
+			@export-music=exportMusic
+			@import-music=importMusic
+			@open-project-modal=openProjectModal
+			:project=activeProject
+			:tones=tones
+			:audio-context=audioContext
+			:has-modals=hasModals></music-box>
+		<modal-root
+			@emit=emitReceived
+			:modals=modals></modal-root>
 	</div>
 
 	<!-- Models -->
@@ -19,9 +30,14 @@
 	<script src='js/Models/Sounder.js'></script>
 	<script src='js/Models/Instrument.js'></script>
 	<script src='js/Models/Part.js'></script>
+	<script src='js/Models/Project.js'></script>
 
 	<!-- Factories -->
 	<script src='js/Factories/InstrumentFactory.js'></script>
+
+	<!-- Generic Components -->
+	<script src='js/Vue/Modal.js'></script>
+	<script src='js/Vue/ModalRoot.js'></script>
 
 	<!-- Components -->
 	<script src='js/Vue/MusicBoxTempoControls.js'></script>
@@ -31,6 +47,7 @@
 	<script src='js/Vue/MusicBoxEditorRow.js'></script>
 	<script src='js/Vue/MusicBoxEditor.js'></script>
 	<script src='js/Vue/MusicBox.js'></script>
+	<script src='js/Vue/ProjectsModalBody.js'></script>
 	<script src='js/Vue/MusicBoxApp.js'></script>
 </body>
 </html>

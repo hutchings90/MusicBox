@@ -53,6 +53,7 @@ Vue.component('music-box-controls', {
 		<div class='music-box-management-controls'>
 			<button @click=exportMusic>Export</button>
 			<button @click=importMusic>Import</button>
+			<button @click=openProjectModal>Projects</button>
 		</div>
 	</div>`,
 	methods: {
@@ -88,6 +89,9 @@ Vue.component('music-box-controls', {
 		},
 		importMusic() {
 			this.$emit('import-music');
+		},
+		openProjectModal() {
+			this.$emit('open-project-modal');
 		}
 	}
 });

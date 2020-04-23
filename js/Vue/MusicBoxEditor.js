@@ -23,6 +23,10 @@ Vue.component('music-box-editor', {
 		autoProgress: {
 			type: Boolean,
 			required: true
+		},
+		hasModals: {
+			type: Boolean,
+			default: false
 		}
 	},
 	template: `<div class='music-box-editor-container'>
@@ -49,10 +53,8 @@ Vue.component('music-box-editor', {
 		</table>
 	</div>`,
 	created() {
-		window.onscroll = () => this.scrollCoords.y = -document.scrollingElement.scrollTop;
-		window.onwheel = (ev) => {
-			if (ev.shiftKey) this.moveScrollCoords('x', this.tickToX(-3 * ev.deltaY / Math.abs(ev.deltaY)));
-		};
+		window.onscroll = () => this.onscrollHandler();
+		window.onwheel = ev => this.onwheelHandler(ev);
 	},
 	data() {
 		return {
@@ -104,10 +106,10 @@ Vue.component('music-box-editor', {
 			// scrollCoords.y keeps going.
 			if (this.scrollCoords.y != -document.scrollingElement.scrollTop) this.scrollCoords.y = -document.scrollingElement.scrollTop;
 		},
-		tick(newVal, oldVal) {
+		tick(newTick, oldTick) {
 			if (!this.autoProgress) return;
 
-			if (newVal > oldVal) {
+			if (newTick > oldTick) {
 				let tickCount = this.xToTick(this.$refs.editor.rows[0].children[1].offsetWidth) - 1;
 				let diff = tickCount - this.scrollTickLead;
 
@@ -174,6 +176,12 @@ Vue.component('music-box-editor', {
 		},
 		movedNewNoteMarker(newNoteMarkerTick) {
 			this.newNoteMarkerTick = newNoteMarkerTick;
+		},
+		onscrollHandler() {
+			this.scrollCoords.y = -document.scrollingElement.scrollTop;
+		},
+		onwheelHandler(ev) {
+			if (!this.hasModals && ev.shiftKey) this.moveScrollCoords('x', this.tickToX(-3 * ev.deltaY / Math.abs(ev.deltaY)));
 		}
 	}
 });

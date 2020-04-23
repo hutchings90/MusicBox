@@ -17,7 +17,7 @@ class Instrument {
 		}, {});
 	}
 
-	pauseSound() {
+	pause() {
 		this.sounders.forEach(sounder => sounder.pause());
 	}
 
@@ -31,8 +31,8 @@ class Instrument {
 		this.soundersByFrequency[note.tone.frequency].play(this.oscillatorType, noteCount);
 	}
 
-	cleanAudioNodes() {
-		this.sounders.forEach(sounder => sounder.cleanAudioNodes());
+	killAudio() {
+		this.sounders.forEach(sounder => sounder.killAudio());
 	}
 
 	toJSON() {

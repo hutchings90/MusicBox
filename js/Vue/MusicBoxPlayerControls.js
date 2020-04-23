@@ -26,7 +26,7 @@ Vue.component('music-box-player-controls', {
 		<button @click=backward :disabled=noNotes><</button>
 		<button @click=fastBackward :disabled=noNotes><<</button>
 		<button v-if=playing class='pause-button' @click=pause>Pause</button>
-		<button @click=play v-else :disabled=noNotes class='play-button'>Play</button>
+		<button v-else @click=play :disabled=noNotes class='play-button'>Play</button>
 		<button @click=stop :disabled=disableStopButton class='stop-button'>Stop</button>
 		<button @click=fastForward :disabled=noNotes>>></button>
 		<button @click=forward :disabled=noNotes>></button>
