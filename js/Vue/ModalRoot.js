@@ -55,9 +55,8 @@ Vue.component('modal-root', {
 			if (!this.hasModals) return;
 
 			switch (ev.keyCode) {
-			case 13: // 'Enter' key submits modal if active modal submits, closes otherwise
+			case 13: // 'Enter' key submits modal if active modal submits
 				if (this.activeModal.submits) this.activeModal.triggerSubmit = true;
-				else this.activeModal.triggerClose = true;
 				break;
 			case 27: // 'Escape' key closes modal if active modal submits, closes otherwise
 				if (this.activeModal.submits) this.activeModal.triggerCancel = true;

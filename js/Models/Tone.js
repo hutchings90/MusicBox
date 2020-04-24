@@ -24,4 +24,8 @@ class Tone {
 
 	get names() { return this._names(); }
 	get namesDisplay() { return this.names.join('/'); }
+
+	copy() {
+		return new Tone(this.names, this.frequency);
+	}
 }

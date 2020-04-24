@@ -1,23 +1,25 @@
 Vue.component('music-box-tempo-controls', {
 	props: {
 		tempo: {
-			type: Number,
-			required: true
+			type: Number
 		},
 		ticksPerBeat: {
-			type: Number,
-			required: true
+			type: Number
+		},
+		hasProject: {
+			type: Boolean,
+			default: false
 		}
 	},
 	template: `<div class='music-box-tempo-controls'>
 		<div>
 			<label>Tempo</label>
-			<input @change=setTempo v-model=tempoEditor type=number min=30/>
+			<input @change=setTempo v-model=tempoEditor :disabled=!hasProject type=number placeholder=- min=30/>
 		</div>
 
 		<div>
 			<label>Ticks Per Beat</label>
-			<input @change=setTicksPerBeat v-model=ticksPerBeatEditor type=number min=1>
+			<input @change=setTicksPerBeat v-model=ticksPerBeatEditor :disabled=!hasProject type=number placeholder=- min=1>
 		</div>
 	</div>`,
 	data() {

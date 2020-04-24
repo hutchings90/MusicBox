@@ -1,18 +1,14 @@
 new Vue({
 	el: '#music-box-app',
 	data() {
-		let project = new Project();
-
 		return {
 			audioContext: null,
 			modals: [],
-			projects: [ project ],
-			activeProject: project
+			projects: [],
+			activeProject: null
 		};
 	},
 	created() {
-		// this.makeNewProject();
-
 		navigator.getUserMedia({
 			audio: true
 		}, stream => this.gotStream(stream), err => this.getStreamError(err));
@@ -65,7 +61,7 @@ new Vue({
 			}
 
 			if (this.projects.length < 1) this.activeProject = null;
-			else this.activeProject = this.projects[this.projects.length - 1];
+			else if (!this.projects.some(project => this.activeProject)) this.activeProject = this.projects[this.projects.length - 1];
 		},
 		activeProject() {
 			if (this.hasModals) {
@@ -73,6 +69,9 @@ new Vue({
 
 				if (this.lastModalIsProjectModal) modal.bodyData.activeProject = this.activeProject;
 			}
+		},
+		audioContext() {
+			if (this.audioContext && this.projects.length < 1) this.makeNewProject();
 		}
 	},
 	methods: {
@@ -117,8 +116,8 @@ new Vue({
 				parts: data.parts.map(part => Part.fromObject(part, this.tonesByFrequency, this.audioContext))
 			});
 
-			this.projects.push(project);
-			this.activeProject = project;
+			this.newActiveProject(project);
+
 			this.importElement.value = '';
 		},
 		exportProject(project) {
@@ -129,15 +128,22 @@ new Vue({
 		activateProject(project) {
 			this.activeProject = project;
 		},
-		closeProject(projectToKill) {
-			projectToKill.killAudio();
+		closeProject(projectToClose) {
+			projectToClose.close();
 
-			this.projects = this.projects.filter(project => project != projectToKill);
+			this.projects = this.projects.filter(project => project != projectToClose);
 		},
-		makeNewProject() {
-			this.projects.push(new Project({
-				parts: [ new Part('music_box', this.audioContext) ]
+		makeNewProject(instrumentName) {
+			this.newActiveProject(new Project({
+				parts: [ new Part(instrumentName, this.audioContext) ]
 			}));
+		},
+		newActiveProject(project) {
+			this.addProject(project);
+			this.activeProject = project;
+		},
+		addProject(project) {
+			this.projects.push(project);
 		}
 	}
 });

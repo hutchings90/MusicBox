@@ -8,6 +8,10 @@ class Note {
 		return new Note(obj.tick, tonesByFrequency[obj.frequency]);
 	}
 
+	copy() {
+		return new Note(this.tick, this.tone.copy());
+	}
+
 	toJSON() {
 		return {
 			tick: this.tick,

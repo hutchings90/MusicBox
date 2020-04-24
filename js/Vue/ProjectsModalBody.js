@@ -18,6 +18,7 @@ Vue.component('projects-modal-body', {
 				@export-project=exportProject
 				@activate=activateProject
 				@close=closeProject
+				@copy=copyProject
 				:key=i
 				:project=project
 				:is-active='project == bodyData.activeProject'></projects-modal-body-project>
@@ -33,6 +34,9 @@ Vue.component('projects-modal-body', {
 				data: data
 			});
 		},
+		makeNewProject() {
+			this.emit('makeNewProject');
+		},
 		exportProject(project) {
 			this.emit('exportProject', project);
 		},
@@ -42,8 +46,8 @@ Vue.component('projects-modal-body', {
 		closeProject(project) {
 			this.emit('closeProject', project);
 		},
-		makeNewProject() {
-			this.emit('makeNewProject');
+		copyProject(project) {
+			this.emit('addProject', project.copy());
 		}
 	}
 });
@@ -60,25 +64,47 @@ Vue.component('projects-modal-body-project', {
 		}
 	},
 	template: `<tr class='projects-modal-body-project'>
-		<td><input v-model=project.name type='text'/></td>
 		<td>
-			<button @click=exportProject>Export</button>
-			<button v-if=!isActive @click=activate>Activate</button>
-			<button @click=close>Close</button>
+			<template><span :class=checkClass>&#10004;</span></template>
+			<input v-model=project.name @keyup.enter='blur($event)' type='text'/>
+		</td>
+		<td>
+			<button v-if=!isActive @click=activate class='activate-button'>Activate</button>
+			<button @click=close class='close-button'>Close</button>
+			<button @click=exportProject class='export-button'>Export</button>
+			<button @click=copy class='copy-button'>Copy</button>
+			<button @click=clear class='clear-button'>Clear</button>
 		</td>
 	</tr>`,
+	computed: {
+		checkClass() {
+			return {
+				'active-check-mark': true,
+				'hide-in-plain-sight': !this.isActive
+			};
+		}
+	},
 	methods: {
 		emit(action) {
 			this.$emit(action, this.project);
-		},
-		exportProject() {
-			this.emit('export-project');
 		},
 		activate() {
 			this.emit('activate');
 		},
 		close() {
 			this.emit('close');
+		},
+		exportProject() {
+			this.emit('export-project');
+		},
+		copy() {
+			this.emit('copy');
+		},
+		clear() {
+			this.project.clear();
+		},
+		blur(ev) {
+			ev.target.blur();
 		}
 	}
 });

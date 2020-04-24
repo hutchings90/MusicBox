@@ -1,8 +1,7 @@
 Vue.component('music-box', {
 	props: {
 		project: {
-			type: Project,
-			required: true
+			type: Project
 		},
 		tones: {
 			type: Array,
@@ -33,12 +32,14 @@ Vue.component('music-box', {
 			@open-project-modal=openProjectModal
 			:tick=tick
 			:delta-tick=deltaTick
-			:tempo=project.tempo
-			:ticks-per-beat=project.ticksPerBeat
+			:tempo=tempo
+			:ticks-per-beat=ticksPerBeat
 			:tempo-multiplier=tempoMultiplier
 			:playing=playing
-			:no-notes=noActiveNotes></music-box-controls>
+			:no-notes=noActiveNotes
+			:has-project=hasProject></music-box-controls>
 		<music-box-editor
+			v-if=hasProject
 			@x-axis-scroll=xAxisScroll
 			@right-mouse-move=rightMouseMove
 			:tick=tick
@@ -62,25 +63,27 @@ Vue.component('music-box', {
 			autoProgress: false,
 			hasBegun: false,
 			promptingForInstrument: false,
-			activePart: this.project.parts[0]
+			activePart: null
 		};
 	},
 	computed: {
+		hasProject() { return Boolean(this.project); },
+		tempo() { return this.hasProject ? this.project.tempo : null; },
+		ticksPerBeat() { return this.hasProject ? this.project.ticksPerBeat : null; },
 		intervalFrequency() { return 60000 / (this.tempoMultiplier * this.project.tempo * this.project.ticksPerBeat); },
 		interval() { return this.playing ? setInterval(() => this.doTick(this.deltaTick), this.intervalFrequency) : null; },
-		notes() { return this.project.parts.reduce((reduction, part) => reduction.concat(part.notes), []); },
+		notes() { return this.hasProject ? this.project.parts.reduce((reduction, part) => reduction.concat(part.notes), []) : []; },
 		tickNoteCount() { return this.notes.filter(note => note.tick == this.tick).length; },
 		maxTick() { return Math.max(0, ...this.notes.map(note => note.tick)); },
-		activeParts() { return this.project.parts; },
+		activeParts() { return this.hasProject ? this.project.parts : []; },
 		hasActiveNotes() { return Boolean(this.activeParts.find(part => part.notes.length > 0)); },
 		noActiveNotes() { return !this.hasActiveNotes; }
 	},
 	watch: {
 		project(newProject, oldProject) {
-			console.log(this.project);
 			this.stop();
 
-			oldProject.killAudio();
+			if (oldProject) oldProject.killAudio();
 		},
 		'project.tempo'() {
 			this.updateIntervalFrequency = true;
@@ -108,6 +111,10 @@ Vue.component('music-box', {
 		},
 		notes() {
 			this.autoProgress = false;
+		},
+		activeParts() {
+			if (this.activeParts.length > 0) this.activePart = this.activeParts[0];
+			else this.activePart = null;
 		}
 	},
 	methods: {
@@ -181,7 +188,7 @@ Vue.component('music-box', {
 			this.tick = tick;
 		},
 		pauseAudioNodes() {
-			this.project.parts.forEach(part => part.instrument.pause());
+			if (this.hasProject) this.project.parts.forEach(part => part.instrument.pause());
 		},
 		xAxisScroll() {
 			this.autoProgress = false;

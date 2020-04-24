@@ -1,9 +1,7 @@
 class Part {
-	constructor(instrumentName, audioContext) {
-		makeReadOnlyProperty(this, 'instrument', InstrumentFactory.makeInstrument(instrumentName, audioContext));
-
-		// Can't be read only because Vue loses reactivity.
-		this.notes = [];
+	constructor(instrumentName, audioContext, notes) {
+		this.instrument = InstrumentFactory.makeInstrument(instrumentName || Part.DEFAULT_INSTRUMENT_NAME, audioContext);
+		this.notes = notes || [];
 	}
 
 	static fromObject(obj, tonesByFrequency, audioContext) {
@@ -13,6 +11,8 @@ class Part {
 
 		return part;
 	}
+
+	static get DEFAULT_INSTRUMENT_NAME() { return 'music_box'; }
 
 	get notesByTick() {
 		return this.notes.reduce((reduction, note) => {
@@ -63,6 +63,17 @@ class Part {
 
 	playTick(tick, noteCount) {
 		this.getNotesForTick(tick).forEach(note => this.instrument.playNote(note, noteCount));
+	}
+
+	copy() {
+		return new Part(this.instrument.name, this.instrument.audioContext, this.notes.map(note => note.copy()));
+	}
+
+	clear() {
+		this.instrument.killAudio();
+
+		this.instrument = InstrumentFactory.makeInstrument(Part.DEFAULT_INSTRUMENT_NAME, this.instrument.audioContext);
+		this.notes = [];
 	}
 
 	toJSON() {

@@ -82,18 +82,23 @@ Vue.component('modal', {
 		<div class='display-container'>
 			<slot name=header>
 				<div
+					class='header'
 					@close=close
 					:is=headerIs
-					:header-data=headerData></div>
+					:header-data=headerData
+					:header-text=headerText></div>
 			</slot>
 			<slot name=body>
 				<div
+					class='body'
 					@emit=emitReceived
 					:is=bodyIs
-					:body-data=bodyData></div>
+					:body-data=bodyData
+					:body-text=bodyText></div>
 			</slot>
 			<slot name=footer>
 				<div
+					class='footer'
 					@close=close
 					@cancel=cancel
 					@submit=submit
@@ -141,7 +146,7 @@ Vue.component('default-modal-header', {
 			default: 'Notice'
 		}
 	},
-	template: `<div class='header'>
+	template: `<div>
 		<div><strong v-text=headerText></strong></div>
 		<button @click=close class='close-button'>&#10006;</button>
 	</div>`,
@@ -158,7 +163,7 @@ Vue.component('default-modal-body', {
 			type: String
 		}
 	},
-	template: `<div class='body'>
+	template: `<div>
 		<div v-text=bodyText></div>
 	</div>`
 });
@@ -182,7 +187,7 @@ Vue.component('default-modal-footer', {
 			default: false
 		}
 	},
-	template: `<div class='footer'>
+	template: `<div>
 		<template v-if=submits>
 			<button @click=cancel v-text=cancelText></button>
 			<button @click=submit v-text=submitText></button>

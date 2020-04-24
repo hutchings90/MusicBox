@@ -9,12 +9,10 @@ Vue.component('music-box-controls', {
 			required: true
 		},
 		tempo: {
-			type: Number,
-			required: true
+			type: Number
 		},
 		ticksPerBeat: {
-			type: Number,
-			required: true
+			type: Number
 		},
 		tempoMultiplier: {
 			type: Number,
@@ -27,6 +25,10 @@ Vue.component('music-box-controls', {
 		noNotes: {
 			type: Boolean,
 			required: true
+		},
+		hasProject: {
+			type: Boolean,
+			default: false
 		}
 	},
 	template: `<div class='music-box-controls'>
@@ -34,7 +36,8 @@ Vue.component('music-box-controls', {
 			@set-tempo=setTempo
 			@set-ticks-per-beat=setTicksPerBeat
 			:tempo=tempo
-			:ticks-per-beat=ticksPerBeat></music-box-tempo-controls>
+			:ticks-per-beat=ticksPerBeat
+			:has-project=hasProject></music-box-tempo-controls>
 
 		<music-box-player-controls
 			@play=play
@@ -51,7 +54,7 @@ Vue.component('music-box-controls', {
 			:no-notes=noNotes></music-box-player-controls>
 
 		<div class='music-box-management-controls'>
-			<button @click=exportMusic>Export</button>
+			<button @click=exportMusic :disabled=!hasProject>Export</button>
 			<button @click=importMusic>Import</button>
 			<button @click=openProjectModal>Projects</button>
 		</div>

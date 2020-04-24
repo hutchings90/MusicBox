@@ -1,9 +1,14 @@
 body {
+	background: gray;
 	margin: 0;
 }
 
 *:focus {
 	outline: none;
+}
+
+.hide-in-plain-sight {
+	opacity: 0;
 }
 
 #music-box-app {
@@ -42,7 +47,7 @@ body {
 	border-radius: 5px;
 }
 
-.music-box-tempo-controls > div > input:hover, .music-box-tempo-controls > div > input:focus {
+.music-box-tempo-controls > div > input:not(:disabled):hover, .music-box-tempo-controls > div > input:focus {
 	background: white;
 }
 
@@ -78,11 +83,10 @@ body {
 
 button {
 	background: #f4f4f4;
-	border-radius: 40%;
+	border-radius: 50%;
 }
 
 .music-box-editor-container {
-	background: gray;
 	padding: 10px 10px 20px;
 }
 
@@ -249,4 +253,32 @@ tr.music-box-editor-row.being-played th.music-box-editor-tone, tr.music-box-edit
 .projects-modal-body .projects-modal-body-project:hover input {
 	background: initial;
 	border: initial;
+}
+
+.projects-modal-body .projects-modal-body-project tr {
+	padding: 10px;
+}
+
+.projects-modal-body .projects-modal-body-project td:nth-child(1) {
+	white-space: nowrap;
+}
+
+.projects-modal-body .projects-modal-body-project td:nth-child(2) {
+	text-align: right;
+}
+
+.projects-modal-body .projects-modal-body-project .close-button {
+	background: red;
+	border-color: red;
+	color: white;
+}
+
+.projects-modal-body .projects-modal-body-project .activate-button {
+	background: green;
+	border-color: green;
+	color: white;
+}
+
+.projects-modal-body .projects-modal-body-project .active-check-mark {
+	color: green;
 }
