@@ -25,18 +25,12 @@ new Vue({
 		importElement() {
 			let input = document.createElement('input');
 
+			input.multiple = 'multiple';
 			input.type = 'file';
 			input.accept = 'application/JSON';
 			input.onchange = () => this.getImportedJSON();
 
 			return input;
-		},
-		fileReader() {
-			let fileReader = new FileReader();
-
-			fileReader.onload = () => this.parseImportedJSON();
-
-			return fileReader;
 		},
 		tones() { return this.audioContext ? [...Tone.TONES].reverse() : []; },
 		tonesByFrequency() {
@@ -50,25 +44,17 @@ new Vue({
 				return reduction;
 			}, {});
 		},
-		lastModalIsProjectModal() { return this.modals.length > 0 && this.modals[0].bodyIs == 'projects-modal-body'; }
+		lastModal() { return this.modals[this.modals.length - 1]; },
+		lastModalIsProjectModal() { return this.lastModal && this.lastModal.bodyIs == 'projects-modal-body'; }
 	},
 	watch: {
 		projects() {
-			if (this.hasModals) {
-				let modal = this.modals[this.modals.length - 1];
+			if (this.hasModals && this.lastModalIsProjectModal) this.lastModal.bodyData.projects = this.projects;
 
-				if (this.lastModalIsProjectModal) modal.bodyData.projects = this.projects;
-			}
-
-			if (this.projects.length < 1) this.activeProject = null;
-			else if (!this.projects.some(project => this.activeProject)) this.activeProject = this.projects[this.projects.length - 1];
+			if (!this.projects.some(project => project == this.activeProject)) this.activeProject = null;
 		},
 		activeProject() {
-			if (this.hasModals) {
-				let modal = this.modals[this.modals.length - 1];
-
-				if (this.lastModalIsProjectModal) modal.bodyData.activeProject = this.activeProject;
-			}
+			if (this.hasModals && this.lastModalIsProjectModal) this.lastModal.bodyData.activeProject = this.activeProject;
 		},
 		audioContext() {
 			if (this.audioContext && this.projects.length < 1) this.makeNewProject();
@@ -91,12 +77,8 @@ new Vue({
 				bodyData: {
 					projects: this.projects,
 					activeProject: this.activeProject
-				},
-				triggerClose: false
+				}
 			});
-		},
-		setActiveProject(project) {
-			this.activeProject = project;
 		},
 		exportMusic() {
 			this.exportProject(this.activeProject);
@@ -105,37 +87,61 @@ new Vue({
 			this.importElement.click();
 		},
 		getImportedJSON() {
-			if (this.importElement.files.length > 0) this.fileReader.readAsText(this.importElement.files[0]);;
-		},
-		parseImportedJSON() {
-			let data = JSON.parse(this.fileReader.result);
-			let project = new Project({
-				name: data.name,
-				tempo: Number(data.tempo),
-				ticksPerBeat: Number(data.ticksPerBeat),
-				parts: data.parts.map(part => Part.fromObject(part, this.tonesByFrequency, this.audioContext))
+			Object.values(this.importElement.files).forEach(file => {
+				let fileReader = new FileReader();
+
+				fileReader.onload = () => {
+					let data = JSON.parse(fileReader.result);
+
+					this.importElement.value = '';
+
+					this.newActiveProject(new Project({
+						name: data.name,
+						tempo: Number(data.tempo),
+						ticksPerBeat: Number(data.ticksPerBeat),
+						parts: data.parts.map(part => new Part({
+							name: part.name,
+							notes: part.notes.map(note => new Note(note.tick, this.tonesByFrequency[note.frequency])),
+							instrument: new Instrument(this.audioContext, Instrument.OPTIONS[part.instrument.name])
+						}))
+					}));
+				};
+
+				fileReader.readAsText(file);
 			});
+		},
+		activateProject(project) {
+			this.activeProject = project;
+		},
+		closeProject(projectToClose) {
+			this.projects = this.projects.filter(project => project != projectToClose);
 
-			this.newActiveProject(project);
-
-			this.importElement.value = '';
+			projectToClose.close();
+		},
+		editProject(project) {
+			this.modals.push({
+				headerText: project.name,
+				headerIs: 'project-modal-header',
+				bodyIs: 'project-modal-body',
+				headerData: {
+					project: project
+				},
+				bodyData: {
+					project: project
+				}
+			});
 		},
 		exportProject(project) {
 			this.exportLink.href = this.exportUrl;
 			this.exportLink.download = project.name + '.json';
 			this.exportLink.click();
 		},
-		activateProject(project) {
-			this.activeProject = project;
-		},
-		closeProject(projectToClose) {
-			projectToClose.close();
-
-			this.projects = this.projects.filter(project => project != projectToClose);
-		},
-		makeNewProject(instrumentName) {
+		makeNewProject() {
 			this.newActiveProject(new Project({
-				parts: [ new Part(instrumentName, this.audioContext) ]
+				parts: [ new Part({
+					name: 'Unnamed Part',
+					instrument: new Instrument(this.audioContext, Instrument.OPTIONS.music_box)
+				}) ]
 			}));
 		},
 		newActiveProject(project) {

@@ -5,25 +5,28 @@ Vue.component('projects-modal-body', {
 			required: true
 		}
 	},
-	template: `<table class='projects-modal-body'>
-		<tbody>
-			<tr v-if=noProjects>
-				<td>No projects</td>
-				<td>
-					<button @click=makeNewProject>New Project</button>
-				</td>
-			</tr>
-			<projects-modal-body-project
-				v-for='(project, i) in bodyData.projects'
-				@export-project=exportProject
-				@activate=activateProject
-				@close=closeProject
-				@copy=copyProject
-				:key=i
-				:project=project
-				:is-active='project == bodyData.activeProject'></projects-modal-body-project>
-		</tbody>
-	</table>`,
+	template: `<div class='projects-modal-body'>
+		<table>
+			<tbody>
+				<tr v-if=noProjects>
+					<td>No projects</td>
+					<td>
+						<button @click=makeNewProject>New Project</button>
+					</td>
+				</tr>
+				<projects-modal-body-project
+					v-for='(project, i) in bodyData.projects'
+					@activate=activateProject
+					@close=closeProject
+					@edit=editProject
+					@export-project=exportProject
+					@copy=copyProject
+					:key=i
+					:project=project
+					:is-active='project == bodyData.activeProject'></projects-modal-body-project>
+			</tbody>
+		</table>
+	</div>`,
 	computed: {
 		noProjects() { return this.bodyData.projects.length < 1; }
 	},
@@ -37,14 +40,17 @@ Vue.component('projects-modal-body', {
 		makeNewProject() {
 			this.emit('makeNewProject');
 		},
-		exportProject(project) {
-			this.emit('exportProject', project);
-		},
 		activateProject(project) {
 			this.emit('activateProject', project);
 		},
 		closeProject(project) {
 			this.emit('closeProject', project);
+		},
+		editProject(project) {
+			this.emit('editProject', project);
+		},
+		exportProject(project) {
+			this.emit('exportProject', project);
 		},
 		copyProject(project) {
 			this.emit('addProject', project.copy());
@@ -69,11 +75,16 @@ Vue.component('projects-modal-body-project', {
 			<input v-model=project.name @keyup.enter='blur($event)' type='text'/>
 		</td>
 		<td>
-			<button v-if=!isActive @click=activate class='activate-button'>Activate</button>
-			<button @click=close class='close-button'>Close</button>
-			<button @click=exportProject class='export-button'>Export</button>
-			<button @click=copy class='copy-button'>Copy</button>
-			<button @click=clear class='clear-button'>Clear</button>
+			<div>
+				<button v-if=!isActive @click=activate class='activate-button'>Activate</button>
+				<button @click=close class='close-button'>Close</button>
+				<button @click=edit class='edit-button'>Edit</button>
+			</div>
+			<div>
+				<button @click=exportProject class='export-button'>Export</button>
+				<button @click=copy class='copy-button'>Copy</button>
+				<button @click=clear class='clear-button'>Clear</button>
+			</div>
 		</td>
 	</tr>`,
 	computed: {
@@ -93,6 +104,9 @@ Vue.component('projects-modal-body-project', {
 		},
 		close() {
 			this.emit('close');
+		},
+		edit() {
+			this.emit('edit');
 		},
 		exportProject() {
 			this.emit('export-project');

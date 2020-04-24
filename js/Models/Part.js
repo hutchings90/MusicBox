@@ -1,18 +1,13 @@
 class Part {
-	constructor(instrumentName, audioContext, notes) {
-		this.instrument = InstrumentFactory.makeInstrument(instrumentName || Part.DEFAULT_INSTRUMENT_NAME, audioContext);
-		this.notes = notes || [];
+	constructor(options) {
+		Object.assign(this, Object.assign({
+			name: 'Unnamed Part',
+			notes: [],
+			instrument: null
+		}), options);
+
+		if (this.instrument) this.notes.forEach(note => this.instrument.addSounder(note.tone));
 	}
-
-	static fromObject(obj, tonesByFrequency, audioContext) {
-		let part = new Part(obj.instrument.name, audioContext);
-
-		obj.notes.forEach(note => part.addNote(Note.fromObject(note, tonesByFrequency)));
-
-		return part;
-	}
-
-	static get DEFAULT_INSTRUMENT_NAME() { return 'music_box'; }
 
 	get notesByTick() {
 		return this.notes.reduce((reduction, note) => {
@@ -66,18 +61,23 @@ class Part {
 	}
 
 	copy() {
-		return new Part(this.instrument.name, this.instrument.audioContext, this.notes.map(note => note.copy()));
+		return new Part({
+			name: this.name,
+			notes: this.notes.map(note => note.copy()),
+			instrument: this.instrument.copy()
+		});
 	}
 
 	clear() {
 		this.instrument.killAudio();
 
-		this.instrument = InstrumentFactory.makeInstrument(Part.DEFAULT_INSTRUMENT_NAME, this.instrument.audioContext);
 		this.notes = [];
+		this.instrument = new Instrument(this.instrument.audioContext, Instrument.OPTIONS.music_box);
 	}
 
 	toJSON() {
 		return {
+			name: this.name,
 			notes: this.notes,
 			instrument: this.instrument
 		};

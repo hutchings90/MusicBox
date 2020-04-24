@@ -4,10 +4,6 @@ class Note {
 		makeReadOnlyProperty(this, 'tone', tone);
 	}
 
-	static fromObject(obj, tonesByFrequency) {
-		return new Note(obj.tick, tonesByFrequency[obj.frequency]);
-	}
-
 	copy() {
 		return new Note(this.tick, this.tone.copy());
 	}

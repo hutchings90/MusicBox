@@ -35,11 +35,12 @@ Vue.component('music-box', {
 			:tempo=tempo
 			:ticks-per-beat=ticksPerBeat
 			:tempo-multiplier=tempoMultiplier
+			:parts=parts
 			:playing=playing
 			:no-notes=noActiveNotes
-			:has-project=hasProject></music-box-controls>
+			:disabled=!project></music-box-controls>
 		<music-box-editor
-			v-if=hasProject
+			v-if=project
 			@x-axis-scroll=xAxisScroll
 			@right-mouse-move=rightMouseMove
 			:tick=tick
@@ -67,15 +68,15 @@ Vue.component('music-box', {
 		};
 	},
 	computed: {
-		hasProject() { return Boolean(this.project); },
-		tempo() { return this.hasProject ? this.project.tempo : null; },
-		ticksPerBeat() { return this.hasProject ? this.project.ticksPerBeat : null; },
+		tempo() { return this.project ? this.project.tempo : null; },
+		ticksPerBeat() { return this.project ? this.project.ticksPerBeat : null; },
 		intervalFrequency() { return 60000 / (this.tempoMultiplier * this.project.tempo * this.project.ticksPerBeat); },
 		interval() { return this.playing ? setInterval(() => this.doTick(this.deltaTick), this.intervalFrequency) : null; },
-		notes() { return this.hasProject ? this.project.parts.reduce((reduction, part) => reduction.concat(part.notes), []) : []; },
+		notes() { return this.project ? this.project.parts.reduce((reduction, part) => reduction.concat(part.notes), []) : []; },
 		tickNoteCount() { return this.notes.filter(note => note.tick == this.tick).length; },
 		maxTick() { return Math.max(0, ...this.notes.map(note => note.tick)); },
-		activeParts() { return this.hasProject ? this.project.parts : []; },
+		parts() { return this.project ? this.project.parts : []; },
+		activeParts() { return this.parts; },
 		hasActiveNotes() { return Boolean(this.activeParts.find(part => part.notes.length > 0)); },
 		noActiveNotes() { return !this.hasActiveNotes; }
 	},
@@ -188,7 +189,7 @@ Vue.component('music-box', {
 			this.tick = tick;
 		},
 		pauseAudioNodes() {
-			if (this.hasProject) this.project.parts.forEach(part => part.instrument.pause());
+			if (this.project) this.project.parts.forEach(part => part.instrument.pause());
 		},
 		xAxisScroll() {
 			this.autoProgress = false;

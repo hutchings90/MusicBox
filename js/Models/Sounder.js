@@ -37,4 +37,8 @@ class Sounder {
 		this.oscillatorNode.disconnect();
 		this.oscillatorNode.stop();
 	}
+
+	copy() {
+		return new Sounder(this.tone.copy(), this.audioContext);
+	}
 }

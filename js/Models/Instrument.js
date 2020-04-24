@@ -1,4 +1,15 @@
 class Instrument {
+	static get OPTIONS() {
+		return [{
+			name: 'music_box',
+			oscillatorType: 'sine',
+			multiNote: true
+		}].reduce((reduction, options) => {
+			reduction[options.name] = options;
+			return reduction;
+		}, {});
+	}
+
 	constructor(audioContext, options) {
 		makeReadOnlyProperty(this, 'audioContext', audioContext);
 		makeReadOnlyProperty(this, 'name', options.name);
@@ -33,6 +44,12 @@ class Instrument {
 
 	killAudio() {
 		this.sounders.forEach(sounder => sounder.killAudio());
+	}
+
+	copy() {
+		return new Instrument(this.audioContext, Object.assign(Object.assign({}, this), {
+			sounders: this.sounders.map(sounder => sounder.copy())
+		}));
 	}
 
 	toJSON() {
