@@ -77,7 +77,8 @@ new Vue({
 				bodyData: {
 					projects: this.projects,
 					activeProject: this.activeProject
-				}
+				},
+				triggerClose: false
 			});
 		},
 		exportMusic() {
@@ -128,7 +129,8 @@ new Vue({
 				},
 				bodyData: {
 					project: project
-				}
+				},
+				triggerClose: false
 			});
 		},
 		exportProject(project) {

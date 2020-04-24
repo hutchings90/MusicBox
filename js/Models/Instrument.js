@@ -20,6 +20,8 @@ class Instrument {
 		makeReadOnlyProperty(this, 'sounders', []);
 	}
 
+	get displayName() { return this.name.split('_').map(word => word ? word[0].toUpperCase() + word.slice(1) : word).join(' '); }
+
 	get soundersByFrequency() {
 		return this.sounders.reduce((reduction, sounder) => {
 			reduction[sounder.tone.frequency] = sounder;

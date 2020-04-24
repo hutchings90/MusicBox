@@ -3,7 +3,8 @@ class Part {
 		Object.assign(this, Object.assign({
 			name: 'Unnamed Part',
 			notes: [],
-			instrument: null
+			instrument: null,
+			showInEditor: true
 		}), options);
 
 		if (this.instrument) this.notes.forEach(note => this.instrument.addSounder(note.tone));
