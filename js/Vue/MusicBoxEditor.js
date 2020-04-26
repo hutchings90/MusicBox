@@ -8,13 +8,16 @@ Vue.component('music-box-editor', {
 			type: Array,
 			required: true
 		},
+		playing: {
+			type: Boolean,
+			required: true
+		},
 		parts: {
 			type: Array,
 			required: true
 		},
-		playing: {
-			type: Boolean,
-			required: true
+		activePart: {
+			type: Part
 		},
 		maxTick: {
 			type: Number,
@@ -45,6 +48,7 @@ Vue.component('music-box-editor', {
 					:tone=tone
 					:playing=playing
 					:parts=parts
+					:active-part=activePart
 					:notes-by-frequency=notesByFrequency
 					:x-to-tick=xToTick
 					:tick-to-x=tickToX></music-box-editor-row>

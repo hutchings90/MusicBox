@@ -32,6 +32,9 @@ Vue.component('music-box-editor-row', {
 			type: Array,
 			required: true
 		},
+		activePart: {
+			type: Part
+		},
 		notesByFrequency: {
 			type: Object,
 			required: true
@@ -51,12 +54,12 @@ Vue.component('music-box-editor-row', {
 			<div v-show=hoveringOverEditor :style=newNoteTickMarkerStyle class='new-note-tick-marker'></div>
 			<div :style=tickMarkerStyle class='tick-marker'></div>
 			<div v-show=hovering :style=newNoteMarkerStyle class='new-note-marker'></div>
-			<template v-for='part in parts'>
+			<template v-for='(part, i) in parts'>
 				<music-box-editor-note
-					v-for='(note, i) in part.getNotesForTone(tone)'
+					v-for='(note, j) in part.getNotesForTone(tone)'
 					@clicked='noteClicked'
 					@mousemoved='onmousemoveNote'
-					:key=i
+					:key='i + "-" + j'
 					:note=note
 					:part=part
 					:tick=tick
@@ -113,7 +116,7 @@ Vue.component('music-box-editor-row', {
 			return this.editorItemStyle(this.scrollTick + tick);
 		},
 		addNote(tick) {
-			if (this.parts.length == 1) this.parts[0].addNote(new Note(tick, this.tone));
+			if (this.activePart) this.activePart.addNote(new Note(tick, this.tone));
 		},
 		removeNote(part, note) {
 			part.removeNote(note);

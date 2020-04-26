@@ -1,13 +1,12 @@
 class Part {
 	constructor(options) {
 		Object.assign(this, Object.assign({
-			name: 'Unnamed Part',
+			name: '',
 			notes: [],
-			instrument: null,
-			showInEditor: true
+			instrument: null
 		}), options);
 
-		if (this.instrument) this.notes.forEach(note => this.instrument.addSounder(note.tone));
+		this.notes.forEach(note => this.instrument.addSounder(note.tone));
 	}
 
 	get notesByTick() {
@@ -70,10 +69,14 @@ class Part {
 	}
 
 	clear() {
-		this.instrument.killAudio();
-
 		this.notes = [];
-		this.instrument = new Instrument(this.instrument.audioContext, Instrument.OPTIONS.music_box);
+		this.setInstrument('Music Box');
+	}
+
+	setInstrument(instrumentName) {
+		this.instrument.killAudio();
+		this.instrument = new Instrument(this.instrument.audioContext, Instrument.OPTIONS[instrumentName]);
+		this.notes.forEach(note => this.instrument.addSounder(note.tone));
 	}
 
 	toJSON() {

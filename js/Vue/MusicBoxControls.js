@@ -22,6 +22,14 @@ Vue.component('music-box-controls', {
 			type: Boolean,
 			required: true
 		},
+		parts: {
+			type: Array,
+			default: () => []
+		},
+		activePart: {
+			type: Part,
+			default: () => { return {}; }
+		},
 		noNotes: {
 			type: Boolean,
 			required: true
@@ -52,12 +60,24 @@ Vue.component('music-box-controls', {
 			:playing=playing
 			:no-notes=noNotes></music-box-player-controls>
 
+		<div>
+			<select v-model=activePartName :disabled=!activePart>
+				<option v-for='part in parts' :value=part.name v-text=part.name></option>
+			</select>
+		</div>
+
 		<div class='music-box-project-controls'>
 			<button @click=exportMusic :disabled=disabled>Export</button>
 			<button @click=importMusic>Import</button>
 			<button @click=openProjectModal>Projects</button>
 		</div>
 	</div>`,
+	computed: {
+		activePartName: {
+			get() { return this.activePart ? this.activePart.name : ''; },
+			set(name) { this.$emit('update-active-part', this.parts.find(part => part.name == name)); }
+		}
+	},
 	methods: {
 		setTempo(tempo) {
 			this.$emit('set-tempo', tempo);

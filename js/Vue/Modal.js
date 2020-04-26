@@ -4,24 +4,13 @@ Vue.component('modal', {
 			type: Boolean,
 			default: true
 		},
-		headerText: {
-			type: String
+		contentData: {
+			type: Object,
+			default: () => { return {}; }
 		},
-		bodyText: {
-			type: String
-		},
-		doneText: {
-			type: String
-		},
-		submitText: {
-			type: String
-		},
-		cancelText: {
-			type: String
-		},
-		submits: {
-			type: Boolean,
-			default: false
+		customData: {
+			type: Object,
+			default: () => { return {}; }
 		},
 		closeOnCancel: {
 			type: Boolean,
@@ -54,27 +43,15 @@ Vue.component('modal', {
 		},
 		headerIs: {
 			type: String,
-			default: 'default-modal-header'
+			default: 'modal-header-default'
 		},
 		bodyIs: {
 			type: String,
-			default: 'default-modal-body'
+			default: 'modal-body-default'
 		},
 		footerIs: {
 			type: String,
-			default: 'default-modal-footer'
-		},
-		headerData: {
-			type: Object,
-			default: () => { return {}; }
-		},
-		bodyData: {
-			type: Object,
-			default: () => { return {}; }
-		},
-		footerData: {
-			type: Object,
-			default: () => { return {}; }
+			default: 'modal-footer-default'
 		}
 	},
 	template: `<div class='modal'>
@@ -85,16 +62,16 @@ Vue.component('modal', {
 					class='header'
 					@close=close
 					:is=headerIs
-					:header-data=headerData
-					:header-text=headerText></div>
+					:section-data=customData.header
+					:text=contentData.headerText></div>
 			</slot>
 			<slot name=body>
 				<div
 					class='body'
 					@emit=emitReceived
 					:is=bodyIs
-					:body-data=bodyData
-					:body-text=bodyText></div>
+					:section-data=customData.body
+					:text=contentData.bodyText></div>
 			</slot>
 			<slot name=footer>
 				<div
@@ -102,9 +79,15 @@ Vue.component('modal', {
 					@close=close
 					@cancel=cancel
 					@submit=submit
+					@custom-button-clicked=customButtonClicked
 					:is=footerIs
-					:submits=submits
-					:footer-data=footerData></div>
+					:done-text=contentData.doneText
+					:submit-text=contentData.submitText
+					:cancel-text=contentData.cancelText
+					:submits=contentData.submits
+					:section-data=customData.footer
+					:left-buttons=contentData.leftButtons
+					:right-buttons=contentData.rightButtons></div>
 			</slot>
 		</div>
 	</div>`,
@@ -117,7 +100,7 @@ Vue.component('modal', {
 		},
 		triggerSubmit() {
 			this.submit();
-		},
+		}
 	},
 	methods: {
 		emitReceived(data) {
@@ -135,19 +118,22 @@ Vue.component('modal', {
 		submit() {
 			if (this.onSubmit) this.onSubmit();
 			if (this.closeOnSubmit) this.close();
+		},
+		customButtonClicked(button) {
+			this.$emit('custom-button-clicked', button);
 		}
 	}
 });
 
-Vue.component('default-modal-header', {
+Vue.component('modal-header-default', {
 	props: {
-		headerText: {
+		text: {
 			type: String,
 			default: 'Notice'
 		}
 	},
-	template: `<div>
-		<div><strong v-text=headerText></strong></div>
+	template: `<div class='default'>
+		<div><strong v-text=text></strong></div>
 		<button @click=close class='close-button'>&#10006;</button>
 	</div>`,
 	methods: {
@@ -157,18 +143,18 @@ Vue.component('default-modal-header', {
 	}
 });
 
-Vue.component('default-modal-body', {
+Vue.component('modal-body-default', {
 	props: {
-		bodyText: {
+		text: {
 			type: String
 		}
 	},
-	template: `<div>
-		<div v-text=bodyText></div>
+	template: `<div class='default'>
+		<div v-text=text></div>
 	</div>`
 });
 
-Vue.component('default-modal-footer', {
+Vue.component('modal-footer-default', {
 	props: {
 		doneText: {
 			type: String,
@@ -185,14 +171,32 @@ Vue.component('default-modal-footer', {
 		submits: {
 			type: Boolean,
 			default: false
+		},
+		leftButtons: {
+			type: Array,
+			default: () => []
+		},
+		rightButtons: {
+			type: Array,
+			default: () => []
 		}
 	},
-	template: `<div>
-		<template v-if=submits>
-			<button @click=cancel v-text=cancelText></button>
-			<button @click=submit v-text=submitText></button>
-		</template>
-		<button v-else @click=close v-text=doneText></button>
+	template: `<div class='default'>
+		<modal-footer-custom-buttons
+			@button-clicked=customButtonClicked
+			:buttons=leftButtons></modal-footer-custom-buttons>
+
+		<div class='primary-buttons'>
+			<template v-if=submits>
+				<button @click=cancel v-text=cancelText class='cancel-button'></button>
+				<button @click=submit v-text=submitText class='submit-button'></button>
+			</template>
+			<button v-else @click=close v-text=doneText class='done-button'></button>
+		</div>
+		<modal-footer-custom-buttons
+			@button-clicked=customButtonClicked
+			:buttons=rightButtons></modal-footer-custom-buttons>
+		</div>
 	</div>`,
 	methods: {
 		close() {
@@ -203,6 +207,29 @@ Vue.component('default-modal-footer', {
 		},
 		submit() {
 			this.$emit('submit');
+		},
+		customButtonClicked(button) {
+			this.$emit('custom-button-clicked', button);
+		}
+	}
+});
+
+Vue.component('modal-footer-custom-buttons', {
+	props: {
+		buttons: {
+			type: Array,
+			default: []
+		}
+	},
+	template: `<div class='left-custom-buttons'>
+		<button
+			v-for='button in buttons'
+			v-text=button.text
+			@click='buttonClicked(button)'></button>
+	</div>`,
+	methods: {
+		buttonClicked(button) {
+			this.$emit('button-clicked', button)
 		}
 	}
 });

@@ -13,12 +13,12 @@ Vue.component('music-box-tempo-controls', {
 	template: `<div class='music-box-tempo-controls'>
 		<div>
 			<label>Tempo</label>
-			<input @change=setTempo v-model=tempoEditor :disabled=disabled type=number placeholder=- min=30/>
+			<input @change=setTempo v-model=tempoEditor :disabled=disabled type=number placeholder='-' min='30'/>
 		</div>
 
 		<div>
 			<label>Ticks Per Beat</label>
-			<input @change=setTicksPerBeat v-model=ticksPerBeatEditor :disabled=disabled type=number placeholder=- min=1>
+			<input @change=setTicksPerBeat v-model=ticksPerBeatEditor :disabled=disabled type=number placeholder='-' min='1'>
 		</div>
 	</div>`,
 	data() {

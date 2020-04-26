@@ -1,6 +1,6 @@
 Vue.component('projects-modal-body', {
 	props: {
-		bodyData: {
+		sectionData: {
 			type: Object,
 			required: true
 		}
@@ -8,14 +8,13 @@ Vue.component('projects-modal-body', {
 	template: `<div class='projects-modal-body'>
 		<table>
 			<tbody>
-				<tr v-if=noProjects>
-					<td>No projects</td>
-					<td>
-						<button @click=makeNewProject>New Project</button>
-					</td>
-				</tr>
+				<template v-if=noProjects>
+					<tr class='instructions'>
+						<td colspan=2 v-text=sectionData.instructions></td>
+					</tr>
+				</template>
 				<projects-modal-body-project
-					v-for='(project, i) in bodyData.projects'
+					v-for='(project, i) in sectionData.projects'
 					@activate=activateProject
 					@close=closeProject
 					@edit=editProject
@@ -23,12 +22,14 @@ Vue.component('projects-modal-body', {
 					@copy=copyProject
 					:key=i
 					:project=project
-					:is-active='project == bodyData.activeProject'></projects-modal-body-project>
+					:is-active='project == sectionData.activeProject'
+					:is-last='i == lastIndex'></projects-modal-body-project>
 			</tbody>
 		</table>
 	</div>`,
 	computed: {
-		noProjects() { return this.bodyData.projects.length < 1; }
+		noProjects() { return this.sectionData.projects.length < 1; },
+		lastIndex() { return this.sectionData.projects.length - 1; }
 	},
 	methods: {
 		emit(action, data) {
@@ -67,12 +68,16 @@ Vue.component('projects-modal-body-project', {
 		isActive: {
 			type: Boolean,
 			default: false
+		},
+		isLast: {
+			type: Boolean,
+			default: false
 		}
 	},
 	template: `<tr class='projects-modal-body-project'>
 		<td>
 			<template><span :class=checkClass>&#10004;</span></template>
-			<input v-model=project.name @keyup.enter='blur($event)' type='text'/>
+			<input ref='nameInput' v-model=project.name @keyup.enter=$event.target.blur() type='text' placeholder='Enter Project Name'/>
 		</td>
 		<td>
 			<div>
@@ -87,13 +92,17 @@ Vue.component('projects-modal-body-project', {
 			</div>
 		</td>
 	</tr>`,
+	mounted() {
+		if (this.autofocus) this.$refs.nameInput.focus();
+	},
 	computed: {
 		checkClass() {
 			return {
 				'active-check-mark': true,
 				'hide-in-plain-sight': !this.isActive
 			};
-		}
+		},
+		autofocus() { return this.isLast && this.isActive && !this.project.name; }
 	},
 	methods: {
 		emit(action) {
@@ -116,9 +125,6 @@ Vue.component('projects-modal-body-project', {
 		},
 		clear() {
 			this.project.clear();
-		},
-		blur(ev) {
-			ev.target.blur();
 		}
 	}
 });

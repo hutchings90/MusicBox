@@ -30,13 +30,15 @@ Vue.component('music-box', {
 			@export-music=exportMusic
 			@import-music=importMusic
 			@open-project-modal=openProjectModal
+			@update-active-part=updateActivePart
 			:tick=tick
 			:delta-tick=deltaTick
 			:tempo=tempo
 			:ticks-per-beat=ticksPerBeat
 			:tempo-multiplier=tempoMultiplier
-			:parts=parts
 			:playing=playing
+			:parts=activeParts
+			:active-part=activePart
 			:no-notes=noActiveNotes
 			:disabled=!project></music-box-controls>
 		<music-box-editor
@@ -45,14 +47,16 @@ Vue.component('music-box', {
 			@right-mouse-move=rightMouseMove
 			:tick=tick
 			:tones=tones
-			:parts=activeParts
 			:playing=playing
+			:parts=activeParts
+			:active-part=activePart
 			:max-tick=maxTick
 			:auto-progress=autoProgress
 			:has-modals=hasModals></music-box-editor>
 	</div>`,
 	created() {
 		window.addEventListener('keypress', ev => this.onkeypressHandler(ev));
+		this.activePart = this.activeParts[0];
 	},
 	data() {
 		return {
@@ -72,12 +76,11 @@ Vue.component('music-box', {
 		ticksPerBeat() { return this.project ? this.project.ticksPerBeat : null; },
 		intervalFrequency() { return 60000 / (this.tempoMultiplier * this.project.tempo * this.project.ticksPerBeat); },
 		interval() { return this.playing ? setInterval(() => this.doTick(this.deltaTick), this.intervalFrequency) : null; },
-		notes() { return this.project ? this.project.parts.reduce((reduction, part) => reduction.concat(part.notes), []) : []; },
-		tickNoteCount() { return this.notes.filter(note => note.tick == this.tick).length; },
-		maxTick() { return Math.max(0, ...this.notes.map(note => note.tick)); },
-		parts() { return this.project ? this.project.parts : []; },
-		activeParts() { return this.parts; },
-		hasActiveNotes() { return Boolean(this.activeParts.find(part => part.notes.length > 0)); },
+		activeParts() { return this.project.settings.partsShownInEditor; },
+		activeNotes() { return this.project ? this.activeParts.reduce((reduction, part) => reduction.concat(part.notes), []) : []; },
+		tickNoteCount() { return this.activeNotes.filter(note => note.tick == this.tick).length; },
+		maxTick() { return Math.max(0, ...this.activeNotes.map(note => note.tick)); },
+		hasActiveNotes() { return this.activeNotes.length > 0; },
 		noActiveNotes() { return !this.hasActiveNotes; }
 	},
 	watch: {
@@ -205,6 +208,9 @@ Vue.component('music-box', {
 		},
 		openProjectModal() {
 			this.$emit('open-project-modal');
+		},
+		updateActivePart(part) {
+			this.activePart = part;
 		},
 		onkeypressHandler(ev) {
 			if (this.hasModals) return;

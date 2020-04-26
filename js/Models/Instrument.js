@@ -1,7 +1,7 @@
 class Instrument {
 	static get OPTIONS() {
 		return [{
-			name: 'music_box',
+			name: 'Music Box',
 			oscillatorType: 'sine',
 			multiNote: true
 		}].reduce((reduction, options) => {
@@ -19,8 +19,6 @@ class Instrument {
 		makeReadOnlyProperty(this, 'canBend', options.canBend || false);
 		makeReadOnlyProperty(this, 'sounders', []);
 	}
-
-	get displayName() { return this.name.split('_').map(word => word ? word[0].toUpperCase() + word.slice(1) : word).join(' '); }
 
 	get soundersByFrequency() {
 		return this.sounders.reduce((reduction, sounder) => {

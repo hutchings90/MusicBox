@@ -1,14 +1,19 @@
 class Project {
 	constructor(options) {
 		Object.assign(this, Object.assign(Project.DEFAULTS, options));
+
+		this.settings.partsShownInEditor = [...this.parts];
 	}
 
 	static get DEFAULTS() {
 		return {
-			name: 'Unnamed Project',
+			name: '',
 			tempo: 90,
 			ticksPerBeat: 1,
-			parts: []
+			parts: [],
+			settings: {
+				partsShownInEditor: []
+			}
 		};
 	}
 
@@ -30,7 +35,7 @@ class Project {
 	}
 
 	clear() {
-		let parts = this.parts.length > 0 ? [ this.parts[0] ] : Project.DEFAULTS;
+		let parts = this.parts.length > 0 ? this.parts.slice(0, 1) : Project.DEFAULTS.parts;
 
 		this.killAudio();
 
@@ -40,6 +45,17 @@ class Project {
 			name: this.name,
 			parts: parts
 		}));
+
+		this.settings.partsShownInEditor = [...parts];
+	}
+
+	addPart(audioContext) {
+		let part = new Part({
+			instrument: new Instrument(audioContext, Instrument.OPTIONS['Music Box'])
+		});
+
+		this.parts.push(part);
+		this.settings.partsShownInEditor.push(part);
 	}
 
 	toJSON() {

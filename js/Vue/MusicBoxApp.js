@@ -14,6 +14,8 @@ new Vue({
 		}, stream => this.gotStream(stream), err => this.getStreamError(err));
 	},
 	computed: {
+		title() { return 'Music Box' + (this.activeProject ? ' - ' + (this.activeProject.name || 'Unnamed Project') : ''); },
+		hasProjects() { return this.projects.length > 0; },
 		hasModals() { return this.modals.length > 0; },
 		exportBlob() {
 			return new Blob([ JSON.stringify(this.activeProject)], {
@@ -49,15 +51,18 @@ new Vue({
 	},
 	watch: {
 		projects() {
-			if (this.hasModals && this.lastModalIsProjectModal) this.lastModal.bodyData.projects = this.projects;
+			if (this.hasModals && this.lastModalIsProjectModal) this.lastModal.customData.body.projects = this.projects;
 
 			if (!this.projects.some(project => project == this.activeProject)) this.activeProject = null;
 		},
 		activeProject() {
-			if (this.hasModals && this.lastModalIsProjectModal) this.lastModal.bodyData.activeProject = this.activeProject;
+			if (this.hasModals && this.lastModalIsProjectModal) this.lastModal.customData.body.activeProject = this.activeProject;
 		},
 		audioContext() {
-			if (this.audioContext && this.projects.length < 1) this.makeNewProject();
+			if (this.audioContext && !this.hasProjects) {
+				this.makeProject();
+				this.openProjectModal();
+			}
 		}
 	},
 	methods: {
@@ -71,12 +76,28 @@ new Vue({
 			console.log(err);
 		},
 		openProjectModal() {
+			let newProjectButtonText = 'New';
+			let importProjectButtonText = 'Import';
+
 			this.modals.push({
-				headerText: 'Projects',
 				bodyIs: 'projects-modal-body',
-				bodyData: {
-					projects: this.projects,
-					activeProject: this.activeProject
+				customData: {
+					body: {
+						projects: this.projects,
+						activeProject: this.activeProject,
+						instructions: 'Click "' + newProjectButtonText + '" to create a new project, or click "' + importProjectButtonText + '" to import an existing project.'
+					}
+				},
+				contentData: {
+					headerText: 'Projects',
+					leftButtons: [{
+						action: 'makeProject',
+						text: newProjectButtonText
+					}],
+					rightButtons: [{
+						action: 'importMusic',
+						text: importProjectButtonText
+					}]
 				},
 				triggerClose: false
 			});
@@ -124,11 +145,16 @@ new Vue({
 				headerText: project.name,
 				headerIs: 'project-modal-header',
 				bodyIs: 'project-modal-body',
-				headerData: {
-					project: project
+				customData: {
+					header: project,
+					body: project
 				},
-				bodyData: {
-					project: project
+				contentData: {
+					leftButtons: [{
+						action: 'newPart',
+						text: 'New Part',
+						params: project
+					}]
 				},
 				triggerClose: false
 			});
@@ -138,11 +164,10 @@ new Vue({
 			this.exportLink.download = project.name + '.json';
 			this.exportLink.click();
 		},
-		makeNewProject() {
+		makeProject() {
 			this.newActiveProject(new Project({
 				parts: [ new Part({
-					name: 'Unnamed Part',
-					instrument: new Instrument(this.audioContext, Instrument.OPTIONS.music_box)
+					instrument: new Instrument(this.audioContext, Instrument.OPTIONS['Music Box'])
 				}) ]
 			}));
 		},
@@ -152,6 +177,12 @@ new Vue({
 		},
 		addProject(project) {
 			this.projects.push(project);
+		},
+		customButtonClicked(button) {
+			this[button.action](button.params);
+		},
+		newPart(project) {
+			project.addPart(this.audioContext);
 		}
 	}
 });

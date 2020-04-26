@@ -7,6 +7,18 @@ body {
 	outline: none;
 }
 
+input, select {
+	background: 0;
+	font-family: inherit;
+	font-size: inherit;
+	border: 0;
+	border-radius: 5px;
+}
+
+input:focus, input:not(:disabled):hover, select:focus, select:not(:disabled):hover {
+	background: white;
+}
+
 .hide-in-plain-sight {
 	opacity: 0;
 }
@@ -42,28 +54,6 @@ body {
 
 .music-box-tempo-controls > div > input {
 	width: 50px;
-}
-
-.music-box-tempo-controls > div > input,
-.projects-modal-body .projects-modal-body-project input,
-.project-modal-header input {
-	background: 0;
-	border: 0;
-}
-
-.music-box-tempo-controls > div > input,
-.projects-modal-body .projects-modal-body-project input,
-.project-modal-header input {
-	border-radius: 5px;
-}
-
-.music-box-tempo-controls > div > input:not(:disabled):hover,
-.music-box-tempo-controls > div > input:focus,
-.projects-modal-body .projects-modal-body-project input:hover,
-.projects-modal-body .projects-modal-body-project input:focus,
-.project-modal-header input:hover, 
-.project-modal-header input:focus {
-	background: white;
 }
 
 .music-box-controls .pause-button:not(:disabled) {
@@ -215,20 +205,22 @@ tr.music-box-editor-row.being-played th.music-box-editor-tone, tr.music-box-edit
 }
 
 .modal .display-container {
-	background: white;
-	max-height: 80%;
-	max-width: 50%;
+	max-height: 90%;
+	max-width: 90%;
 	display: inline-block;
-	border-radius: 10%;
 	position: absolute;
 	transform: translate(-50%, -50%);
 	top: 50vh;
 	left: 50vw;
 }
 
+.modal .display-container .header, .modal .display-container .footer {
+	background-image: radial-gradient(#ccc, #ddd);
+	padding: 15px 50px;
+}
+
 .modal .display-container .header {
 	position: relative;
-	padding: 10px 50px;
 	border-radius: 10px 10px 0 0;
 	text-transform: uppercase;
 }
@@ -256,12 +248,23 @@ tr.music-box-editor-row.being-played th.music-box-editor-tone, tr.music-box-edit
 }
 
 .modal .display-container .footer {
-	padding: 5px 0;
 	border-radius: 0 0 10px 10px;
 }
 
-.modal .display-container .header, .modal .footer {
-	background-image: radial-gradient(#ccc, #ddd);
+.modal .display-container .footer .done-button, .modal .display-container .footer .submit-button {
+	background: blue;
+	border-color: blue;
+	color: white;
+}
+
+.modal .display-container .footer .cancel-button {
+	background: red;
+	border-color: red;
+	color: white;
+}
+
+.modal .display-container .footer.default > div {
+	display: inline-block;
 }
 
 .projects-modal-body table {
@@ -272,12 +275,16 @@ tr.music-box-editor-row.being-played th.music-box-editor-tone, tr.music-box-edit
 	background: 0;
 }
 
-.projects-modal-body .projects-modal-body-project:hover input {
+.projects-modal-body .projects-modal-body-project input:hover {
 	background: white;
 }
 
 .projects-modal-body .projects-modal-body-project:hover {
 	background-image: radial-gradient(#ccc, #ddd);
+}
+
+.projects-modal-body .instructions {
+	text-align: left;
 }
 
 .projects-modal-body .projects-modal-body-project td {
@@ -316,4 +323,12 @@ tr.music-box-editor-row.being-played th.music-box-editor-tone, tr.music-box-edit
 .project-modal-body td, .project-modal-body th {
 	text-align: left;
 	padding: 5px;
+}
+
+.project-modal-body .project-modal-body-part:hover {
+	background-image: radial-gradient(#ccc, #ddd);
+}
+
+.project-modal-body table {
+	border-collapse: collapse;
 }

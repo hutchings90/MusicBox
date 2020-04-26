@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Music Box</title>
-
 	<link rel='stylesheet' type='text/css' href='css/styles.css'>
 
 	<script src='js/header.js'></script>
@@ -10,6 +8,8 @@
 </head>
 <body>
 	<div id='music-box-app'>
+		<title v-text=title></title>
+
 		<music-box
 			v-if=audioContext
 			@export-music=exportMusic
@@ -21,6 +21,7 @@
 			:has-modals=hasModals></music-box>
 		<modal-root
 			@emit=emitReceived
+			@custom-button-clicked=customButtonClicked
 			:modals=modals></modal-root>
 	</div>
 
