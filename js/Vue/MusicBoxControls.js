@@ -27,8 +27,7 @@ Vue.component('music-box-controls', {
 			default: () => []
 		},
 		activePart: {
-			type: Part,
-			default: () => { return {}; }
+			type: Part
 		},
 		noNotes: {
 			type: Boolean,
@@ -61,7 +60,7 @@ Vue.component('music-box-controls', {
 			:no-notes=noNotes></music-box-player-controls>
 
 		<div>
-			<select v-model=activePartName :disabled=!activePart>
+			<select v-model=activePartName :disabled=noParts>
 				<option v-for='part in parts' :value=part.name v-text=part.name></option>
 			</select>
 		</div>
@@ -76,7 +75,8 @@ Vue.component('music-box-controls', {
 		activePartName: {
 			get() { return this.activePart ? this.activePart.name : ''; },
 			set(name) { this.$emit('update-active-part', this.parts.find(part => part.name == name)); }
-		}
+		},
+		noParts() { return this.parts.length < 1; }
 	},
 	methods: {
 		setTempo(tempo) {

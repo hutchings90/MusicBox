@@ -117,8 +117,7 @@ Vue.component('music-box', {
 			this.autoProgress = false;
 		},
 		activeParts() {
-			if (this.activeParts.length > 0) this.activePart = this.activeParts[0];
-			else this.activePart = null;
+			if (!this.activeParts.some(part => part == this.activePart)) this.activePart = null;
 		}
 	},
 	methods: {

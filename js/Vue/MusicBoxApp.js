@@ -9,6 +9,8 @@ new Vue({
 		};
 	},
 	created() {
+		window.addEventListener('contextmenu', ev => this.contextMenuHandler(ev));
+
 		navigator.getUserMedia({
 			audio: true
 		}, stream => this.gotStream(stream), err => this.getStreamError(err));
@@ -142,7 +144,6 @@ new Vue({
 		},
 		editProject(project) {
 			this.modals.push({
-				headerText: project.name,
 				headerIs: 'project-modal-header',
 				bodyIs: 'project-modal-body',
 				customData: {
@@ -183,6 +184,10 @@ new Vue({
 		},
 		newPart(project) {
 			project.addPart(this.audioContext);
+		},
+		contextMenuHandler(ev) {
+			ev.preventDefault();
+			ev.stopPropagation();
 		}
 	}
 });

@@ -222,7 +222,6 @@ tr.music-box-editor-row.being-played th.music-box-editor-tone, tr.music-box-edit
 .modal .display-container .header {
 	position: relative;
 	border-radius: 10px 10px 0 0;
-	text-transform: uppercase;
 }
 
 .modal .display-container .header .close-button {

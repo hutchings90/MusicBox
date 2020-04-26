@@ -34,11 +34,10 @@ Vue.component('music-box-editor-note', {
 	},
 	methods: {
 		clicked(ev) {
-			this.$emit('clicked', {
-				ev: ev,
-				part: this.part,
-				note: this.note
-			});
+			ev.preventDefault();
+			ev.stopPropagation();
+
+			this.$emit('clicked', this.note);
 		},
 		mousemoved() {
 			this.$emit('mousemoved', this.note);

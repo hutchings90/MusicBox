@@ -50,7 +50,7 @@ Vue.component('music-box-editor-row', {
 	},
 	template: `<tr :class=classObject>
 		<th @mouseenter=onMouseEnterTones class='music-box-editor-tone' v-text=toneNamesDisplay></th>
-		<td @click=rowClicked @mouseenter=onMouseEnterNotes @mousemove='onmousemove($event)' @mouseleave='onmouseleave' class='music-box-editor-score'>
+		<td @click=rowClicked @mouseenter=onMouseEnterNotes @mousemove=onmousemove($event) @mouseleave=onmouseleave class='music-box-editor-score'>
 			<div v-show=hoveringOverEditor :style=newNoteTickMarkerStyle class='new-note-tick-marker'></div>
 			<div :style=tickMarkerStyle class='tick-marker'></div>
 			<div v-show=hovering :style=newNoteMarkerStyle class='new-note-marker'></div>
@@ -118,14 +118,11 @@ Vue.component('music-box-editor-row', {
 		addNote(tick) {
 			if (this.activePart) this.activePart.addNote(new Note(tick, this.tone));
 		},
-		removeNote(part, note) {
-			part.removeNote(note);
-		},
-		noteClicked(data) {
-			data.ev.preventDefault();
-			data.ev.stopPropagation();
+		noteClicked(clickedNote) {
+			let notesForTone = this.activePart.getNotesForTone(clickedNote.tone);
 
-			this.removeNote(data.part, data.note);
+			if (notesForTone.length < 1) this.addNote(clickedNote.tick);
+			else if (notesForTone.some(note => note == clickedNote)) this.activePart.removeNote(clickedNote);
 		},
 		onmousemove(ev) {
 			let x;

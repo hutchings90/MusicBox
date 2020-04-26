@@ -225,7 +225,7 @@ Vue.component('modal-footer-custom-buttons', {
 		<button
 			v-for='button in buttons'
 			v-text=button.text
-			@click='buttonClicked(button)'></button>
+			@click=buttonClicked(button)></button>
 	</div>`,
 	methods: {
 		buttonClicked(button) {
