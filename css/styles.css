@@ -178,6 +178,12 @@ tr.music-box-editor-row.being-played th.music-box-editor-tone, tr.music-box-edit
 	background: orange;
 }
 
+.commander {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+}
+
 .modal-root, .modal, .modal .backdrop {
 	width: 100%;
 	position: absolute;

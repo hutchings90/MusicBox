@@ -53,6 +53,9 @@ Vue.component('music-box', {
 			:max-tick=maxTick
 			:auto-progress=autoProgress
 			:has-modals=hasModals></music-box-editor>
+		<commander
+			:part=activePart
+			:tick=tick></commander>
 	</div>`,
 	created() {
 		window.addEventListener('keypress', ev => this.onkeypressHandler(ev));
