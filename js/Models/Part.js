@@ -73,9 +73,11 @@ class Part {
 		this.setInstrument('Music Box');
 	}
 
-	setInstrument(instrumentName) {
+	setInstrument(name) {
+		if (this.instrument && name == this.instrument.name) return;
+
 		this.instrument.killAudio();
-		this.instrument = new Instrument(this.instrument.audioContext, Instrument.OPTIONS[instrumentName]);
+		this.instrument = new Instrument(this.instrument.audioContext, Instrument.KEYED_ALL_OPTIONS[name]);
 		this.notes.forEach(note => this.instrument.addSounder(note.tone));
 	}
 

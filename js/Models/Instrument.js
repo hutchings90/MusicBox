@@ -1,18 +1,53 @@
 class Instrument {
-	static get OPTIONS() {
-		return [{
-			name: 'Music Box',
+	static CUSTOM_OPTIONS = [];
+
+	static get DEFAULT_OPTIONS() {
+		return {
+			name: '',
 			oscillatorType: 'sine',
+			multiNote: false
+		};
+	}
+
+	static get STANDARD_OPTIONS() {
+		let defaultOptions = Instrument.DEFAULT_OPTIONS;
+
+		return [Object.assign(Object.assign({}, defaultOptions), {
+			name: 'Music Box',
 			multiNote: true
-		}].reduce((reduction, options) => {
-			reduction[options.name] = options;
-			return reduction;
-		}, {});
+		}), Object.assign(Object.assign({}, defaultOptions), {
+			name: 'Violin'
+		})];
+	}
+
+	static get KEYED_STANDARD_OPTIONS() {
+		return keyItemsByProp('name', Instrument.STANDARD_OPTIONS);
+	}
+
+	static get KEYED_CUSTOM_OPTIONS() {
+		return keyItemsByProp('name', Instrument.CUSTOM_OPTIONS);
+	}
+
+	static get KEYED_ALL_OPTIONS() {
+		return Object.assign(Instrument.KEYED_STANDARD_OPTIONS, Instrument.KEYED_CUSTOM_OPTIONS);
+	}
+
+	static addCustomInstrument(name) {
+		Instrument.CUSTOM_OPTIONS.push(Object.assign(Object.assign({}, Instrument.DEFAULT_OPTIONS, {
+			name: name
+		})));
 	}
 
 	constructor(audioContext, options) {
+		options = options || {
+			name: ''
+		};
+
+		this.name = options.name;
+
+		if (this.name && !Instrument.KEYED_ALL_OPTIONS[this.name]) Instrument.addCustomInstrument(this.name);
+
 		makeReadOnlyProperty(this, 'audioContext', audioContext);
-		makeReadOnlyProperty(this, 'name', options.name);
 		makeReadOnlyProperty(this, 'oscillatorType', options.oscillatorType || 'sine');
 		makeReadOnlyProperty(this, 'multiNote', options.multiNote || false);
 		makeReadOnlyProperty(this, 'canSlide', options.canSlide || false);

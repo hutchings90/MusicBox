@@ -19,6 +19,18 @@ input:focus, input:not(:disabled):hover, select:focus, select:not(:disabled):hov
 	background: white;
 }
 
+button.danger {
+	background: red !important;
+	border-color: red !important;
+	color: white;
+}
+
+button.done, button.submit {
+	background: blue !important;
+	border-color: blue !important;
+	color: white !important;
+}
+
 .hide-in-plain-sight {
 	opacity: 0;
 }
@@ -256,32 +268,17 @@ tr.music-box-editor-row.being-played th.music-box-editor-tone, tr.music-box-edit
 	border-radius: 0 0 10px 10px;
 }
 
-.modal .display-container .footer .done-button, .modal .display-container .footer .submit-button {
-	background: blue;
-	border-color: blue;
-	color: white;
-}
-
-.modal .display-container .footer .cancel-button {
-	background: red;
-	border-color: red;
-	color: white;
-}
-
 .modal .display-container .footer.default > div {
 	display: inline-block;
 }
 
+.modal-header-input input {
+	font-weight: bold;
+	text-align: center;
+}
+
 .projects-modal-body table {
 	border-collapse: collapse;
-}
-
-.projects-modal-body .projects-modal-body-project input {
-	background: 0;
-}
-
-.projects-modal-body .projects-modal-body-project input:hover {
-	background: white;
 }
 
 .projects-modal-body .projects-modal-body-project:hover {
@@ -318,11 +315,6 @@ tr.music-box-editor-row.being-played th.music-box-editor-tone, tr.music-box-edit
 
 .projects-modal-body .projects-modal-body-project .active-check-mark {
 	color: green;
-}
-
-.project-modal-header input {
-	font-weight: bold;
-	text-align: center;
 }
 
 .project-modal-body td, .project-modal-body th {

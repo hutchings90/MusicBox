@@ -17,6 +17,10 @@ class Project {
 		};
 	}
 
+	pause() {
+		this.parts.forEach(part => part.instrument.pause());
+	}
+
 	killAudio() {
 		this.parts.forEach(part => part.instrument.killAudio());
 	}
@@ -51,7 +55,7 @@ class Project {
 
 	addPart(audioContext) {
 		let part = new Part({
-			instrument: new Instrument(audioContext, Instrument.OPTIONS['Music Box'])
+			instrument: new Instrument(audioContext, Instrument.KEYED_STANDARD_OPTIONS['Music Box'])
 		});
 
 		this.parts.push(part);

@@ -6,3 +6,10 @@ function makeReadOnlyProperty(obj, prop, value) {
 		writable: false
 	});
 }
+
+function keyItemsByProp(prop, items) {
+	return items.reduce((reduction, item) => {
+		reduction[item[prop]] = item;
+		return reduction;
+	}, {});
+}

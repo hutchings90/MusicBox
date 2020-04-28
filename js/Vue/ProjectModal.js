@@ -1,7 +1,7 @@
 Vue.component('project-modal-body', {
 	props: {
 		sectionData: {
-			type: Project,
+			type: Object,
 			required: true
 		}
 	},
@@ -16,18 +16,20 @@ Vue.component('project-modal-body', {
 			</thead>
 			<tbody>
 				<project-modal-body-part
-					v-for='(part, i) in project.parts'
+					v-for='(part, i) in sectionData.project.parts'
 					@update-show-in-editor=updateShowInEditor
+					@new-custom-instrument=newCustomInstrument
 					:key=i
 					:is-last='i == lastPartIndex'
 					:project-has-name=projectHasName
 					:part=part
-					:initial-show-in-editor=partShownInEditor(part)></project-modal-body-part>
+					:initial-show-in-editor=partShownInEditor(part)
+					:custom-instrument-options=sectionData.customInstrumentOptions></project-modal-body-part>
 			</tbody>
 		</table>
 	</div>`,
 	computed: {
-		project() { return this.sectionData; },
+		project() { return this.sectionData.project; },
 		projectHasName() { return Boolean(this.project.name); },
 		lastPartIndex() { return this.project.parts.length - 1; },
 		partsShownInEditor() { return this.project.settings.partsShownInEditor; }
@@ -44,6 +46,11 @@ Vue.component('project-modal-body', {
 
 			if (i != -1) this.partsShownInEditor.splice(i, 1);
 			else this.partsShownInEditor.push(part);
+		},
+		newCustomInstrument() {
+			this.$emit('emit', {
+				action: 'newCustomInstrument'
+			});
 		}
 	}
 });
@@ -65,14 +72,24 @@ Vue.component('project-modal-body-part', {
 		initialShowInEditor: {
 			type: Boolean,
 			default: true
+		},
+		customInstrumentOptions: {
+			type: Array,
+			default: []
 		}
 	},
 	template: `<tr class='project-modal-body-part'>
 		<td><input @change=updateShowInEditor v-model=showInEditor type='checkbox'/></td>
 		<td><input ref=partNameInput v-model=part.name @keyup.enter=$event.target.blur() placeholder='Enter Part Name' /></td>
 		<td>
-			<select @change=updateInstrument v-model=instrumentName>
-				<option v-for='option in instrumentOptions' v-text=option.name @change=updateInstrument>></option>
+			<select v-model=instrumentName>
+				<optgroup label='Standard'>
+					<option v-for='option in standardInstrumentOptions' v-text=option.name @change=updateInstrument>></option>
+				</optgroup>
+				<optgroup label='Custom'>
+					<option>New Custom Instrument</option>
+					<option v-for='option in customInstrumentOptions' v-text=option.name @change=updateInstrument>></option>
+				</optgroup>
 			</select>
 		</td>
 	</tr>`,
@@ -82,18 +99,36 @@ Vue.component('project-modal-body-part', {
 	data() {
 		return {
 			instrumentName: this.part.instrument.name,
-			showInEditor: this.initialShowInEditor
+			showInEditor: this.initialShowInEditor,
+			creatingCustomInstrument: false
 		};
 	},
 	computed: {
-		instrumentOptions() { return Instrument.OPTIONS; },
+		standardInstrumentOptions() { return Instrument.STANDARD_OPTIONS; },
+		hasCustomInstrumentOptions() { return this.customInstrumentOptions.length > 0; },
+		lastCustomInstrumentOptionIndex() { return this.customInstrumentOptions.length - 1; }
+	},
+	watch: {
+		customInstrumentOptions() {
+			if (this.creatingCustomInstrument && this.hasCustomInstrumentOptions) this.instrumentName = this.customInstrumentOptions[this.lastCustomInstrumentOptionIndex].name;
+		},
+		instrumentName() {
+			this.updateInstrument();
+		}
 	},
 	methods: {
 		updateShowInEditor() {
 			this.$emit('update-show-in-editor', this.part);
 		},
 		updateInstrument() {
-			this.part.setInstrument(this.instrumentName);
+			if (this.instrumentName == 'New Custom Instrument') {
+				this.creatingCustomInstrument = true;
+				this.$emit('new-custom-instrument');
+			}
+			else {
+				this.creatingCustomInstrument = false;
+				this.part.setInstrument(this.instrumentName);
+			}
 		}
 	}
 });

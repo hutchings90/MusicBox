@@ -49,7 +49,8 @@ new Vue({
 			}, {});
 		},
 		lastModal() { return this.modals[this.modals.length - 1]; },
-		lastModalIsProjectModal() { return this.lastModal && this.lastModal.bodyIs == 'projects-modal-body'; }
+		lastModalIsProjectModal() { return this.lastModal && this.lastModal.bodyIs == 'projects-modal-body'; },
+		lastModalIsCustomInstrumentModal() { return this.lastModal && this.lastModal.bodyIs == 'custom-instrument-modal-body'}
 	},
 	watch: {
 		projects() {
@@ -78,8 +79,8 @@ new Vue({
 			console.log(err);
 		},
 		openProjectModal() {
-			let newProjectButtonText = 'New';
-			let importProjectButtonText = 'Import';
+			let newProjectButtonText = 'New Project';
+			let importProjectButtonText = 'Import Project';
 
 			this.modals.push({
 				bodyIs: 'projects-modal-body',
@@ -124,9 +125,11 @@ new Vue({
 						tempo: Number(data.tempo),
 						ticksPerBeat: Number(data.ticksPerBeat),
 						parts: data.parts.map(part => new Part({
-							name: part.name,
+							name: part.name || '',
 							notes: part.notes.map(note => new Note(note.tick, this.tonesByFrequency[note.frequency])),
-							instrument: new Instrument(this.audioContext, Instrument.OPTIONS[part.instrument.name])
+							instrument: new Instrument(this.audioContext, Instrument.KEYED_ALL_OPTIONS[part.instrument.name] || {
+								name: part.instrument.name || ''
+							})
 						}))
 					}));
 				};
@@ -144,11 +147,17 @@ new Vue({
 		},
 		editProject(project) {
 			this.modals.push({
-				headerIs: 'project-modal-header',
+				headerIs: 'modal-header-input',
 				bodyIs: 'project-modal-body',
 				customData: {
-					header: project,
-					body: project
+					header: {
+						item: project,
+						placeholder: 'Enter Project Name'
+					},
+					body: {
+						project: project,
+						customInstrumentOptions: Instrument.CUSTOM_OPTIONS
+					}
 				},
 				contentData: {
 					leftButtons: [{
@@ -168,7 +177,7 @@ new Vue({
 		makeProject() {
 			this.newActiveProject(new Project({
 				parts: [ new Part({
-					instrument: new Instrument(this.audioContext, Instrument.OPTIONS['Music Box'])
+					instrument: new Instrument(this.audioContext, Instrument.KEYED_STANDARD_OPTIONS['Music Box'])
 				}) ]
 			}));
 		},
@@ -188,6 +197,56 @@ new Vue({
 		contextMenuHandler(ev) {
 			ev.preventDefault();
 			ev.stopPropagation();
+		},
+		newCustomInstrument() {
+			let app = this;
+			let modal = this.lastModal;
+			let instrument = new Instrument(this.audioContext);
+
+			this.modals.push({
+				headerIs: 'modal-header-input',
+				bodyIs: 'custom-instrument-modal-body',
+				onSubmit() {
+					if (!app.validateCustomInstrument(instrument)) return false;
+
+					modal.customData.body.customInstrumentOptions = Instrument.CUSTOM_OPTIONS;
+
+					return true;
+				},
+				contentData: {
+					submits: true
+				},
+				customData: {
+					header: {
+						item: instrument,
+						placeholder: 'Enter Instrument Name'
+					},
+					body: instrument
+				},
+				triggerSubmit: false,
+				triggerCancel: false
+			});
+		},
+		validateCustomInstrument(instrument) {
+			let type = '';
+			let name = instrument.name;
+
+			if (Instrument.KEYED_STANDARD_OPTIONS[name]) type = 'standard';
+			else if (Instrument.KEYED_CUSTOM_OPTIONS[name]) type = 'custom';
+			else {
+				Instrument.addCustomInstrument(name);
+				return true;
+			}
+
+			this.modals.push({
+				contentData: {
+					headerText: 'Instrument Unavailable',
+					bodyText: 'A ' + type + ' instrument named "' + name + '" already exists. Instruments must have a unique name.'
+				},
+				triggerClose: false
+			});
+
+			return false;
 		}
 	}
 });

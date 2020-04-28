@@ -60,8 +60,9 @@ Vue.component('music-box-controls', {
 			:no-notes=noNotes></music-box-player-controls>
 
 		<div>
-			<select v-model=activePartName :disabled=noParts>
-				<option v-for='part in parts' :value=part.name v-text=part.name></option>
+			<select @change=updateActivePart v-model=activePartIndex :disabled=noParts>
+				<option v-if=noParts value=null>No Active Parts</option>
+				<option v-for='(part, i) in parts' :value=i v-text=partNameDisplay(part)></option>
 			</select>
 		</div>
 
@@ -71,14 +72,29 @@ Vue.component('music-box-controls', {
 			<button @click=openProjectModal>Projects</button>
 		</div>
 	</div>`,
+	data() {
+		return {
+			activePartIndex: this.parts.findIndex(part => part == this.activePart)
+		};
+	},
 	computed: {
-		activePartName: {
-			get() { return this.activePart ? this.activePart.name : ''; },
-			set(name) { this.$emit('update-active-part', this.parts.find(part => part.name == name)); }
-		},
 		noParts() { return this.parts.length < 1; }
 	},
+	watch: {
+		parts() {
+			this.activePartIndex = null;
+		},
+		noParts() {
+			if (this.noParts) this.activePartIndex = null;
+		}
+	},
 	methods: {
+		updateActivePart() {
+			this.$emit('update-active-part', this.parts[this.activePartIndex]);
+		},
+		partNameDisplay(part) {
+			return part.name + ' (' + part.instrument.name + ')';
+		},
 		setTempo(tempo) {
 			this.$emit('set-tempo', tempo);
 		},

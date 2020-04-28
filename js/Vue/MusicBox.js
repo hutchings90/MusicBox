@@ -79,7 +79,7 @@ Vue.component('music-box', {
 		ticksPerBeat() { return this.project ? this.project.ticksPerBeat : null; },
 		intervalFrequency() { return 60000 / (this.tempoMultiplier * this.project.tempo * this.project.ticksPerBeat); },
 		interval() { return this.playing ? setInterval(() => this.doTick(this.deltaTick), this.intervalFrequency) : null; },
-		activeParts() { return this.project.settings.partsShownInEditor; },
+		activeParts() { return this.project ? this.project.settings.partsShownInEditor : []; },
 		activeNotes() { return this.project ? this.activeParts.reduce((reduction, part) => reduction.concat(part.notes), []) : []; },
 		tickNoteCount() { return this.activeNotes.filter(note => note.tick == this.tick).length; },
 		maxTick() { return Math.max(0, ...this.activeNotes.map(note => note.tick)); },
@@ -89,8 +89,9 @@ Vue.component('music-box', {
 	watch: {
 		project(newProject, oldProject) {
 			this.stop();
+			this.updateActivePart(null);
 
-			if (oldProject) oldProject.killAudio();
+			if (oldProject) oldProject.pause();
 		},
 		'project.tempo'() {
 			this.updateIntervalFrequency = true;

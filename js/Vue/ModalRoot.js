@@ -12,6 +12,9 @@ Vue.component('modal-root', {
 				@emit=emitReceived
 				@close=popModal
 				@custom-button-clicked=customButtonClicked
+				@untrigger-close=untriggerClose(modalData)
+				@untrigger-cancel=untriggerCancel(modalData)
+				@untrigger-submit=untriggerSubmit(modalData)
 				:key=i
 				:show-backdrop='i == lastIndex'
 				:content-data=modalData.contentData
@@ -40,8 +43,8 @@ Vue.component('modal-root', {
 	},
 	computed: {
 		hasModals() { return this.modals.length > 0; },
-		activeModal() { return this.modals[this.modals.length - 1]; },
-		lastIndex() { return this.modals.length - 1; }
+		lastIndex() { return this.modals.length - 1; },
+		lastModal() { return this.modals[this.lastIndex]; }
 	},
 	methods: {
 		emitReceived(data) {
@@ -56,25 +59,41 @@ Vue.component('modal-root', {
 		keyHandler(ev) {
 			if (!this.hasModals) return;
 
-			switch (ev.target.tagName.toLowerCase()) {
-			case 'button':
-			case 'input': return;
-			}
-
 			switch (ev.keyCode) {
-			case 13: // 'Enter' key submits modal if active modal submits
-				if (this.activeModal.submits) this.activeModal.triggerSubmit = true;
-				else this.activeModal.triggerClose = true;
+			case 13: // 'Enter' key submits modal if active modal submits, unless a button or input had focus.
+				if (this.inputIgnoredBySubmit(ev)) return;
+
+				if (this.lastModal.contentData.submits) this.lastModal.triggerSubmit = true;
+				else this.lastModal.triggerClose = true;
 				break;
-			case 27: // 'Escape' key closes modal if active modal submits, closes otherwise
-				if (this.activeModal.submits) this.activeModal.triggerCancel = true;
-				else this.activeModal.triggerClose = true;
+			case 27: // 'Escape' key closes modal if active modal submits, closes otherwise.
+				if (this.inputIgnoredBySubmit(ev)) return;
+
+				if (this.lastModal.contentData.submits) this.lastModal.triggerCancel = true;
+				else this.lastModal.triggerClose = true;
 				break;
 			default: return; // Return to avoid calls to preventDefault and stopPropagation.
 			}
 
 			ev.preventDefault();
 			ev.stopPropagation();
+		},
+		inputIgnoredBySubmit(ev) {
+			switch (ev.target.tagName.toLowerCase()) {
+			case 'button':
+			case 'input': return true;
+			}
+
+			return false;
+		},
+		untriggerClose(modalData) {
+			modalData.triggerClose = false;
+		},
+		untriggerCancel(modalData) {
+			modalData.triggerCancel = false;
+		},
+		untriggerSubmit(modalData) {
+			modalData.triggerSubmit = false;
 		}
 	}
 });

@@ -119,6 +119,8 @@ Vue.component('music-box-editor-row', {
 			if (this.activePart) this.activePart.addNote(new Note(tick, this.tone));
 		},
 		noteClicked(clickedNote) {
+			if (!this.activePart) return;
+
 			let notesForTone = this.activePart.getNotesForTone(clickedNote.tone);
 
 			if (notesForTone.length < 1) this.addNote(clickedNote.tick);
