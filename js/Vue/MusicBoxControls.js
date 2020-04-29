@@ -60,7 +60,7 @@ Vue.component('music-box-controls', {
 			:no-notes=noNotes></music-box-player-controls>
 
 		<div>
-			<select @change=updateActivePart v-model=activePartIndex :disabled=noParts>
+			<select v-model=activePartIndex :disabled=noParts>
 				<option v-if=noParts value=null>No Active Parts</option>
 				<option v-for='(part, i) in parts' :value=i v-text=partNameDisplay(part)></option>
 			</select>
@@ -72,26 +72,19 @@ Vue.component('music-box-controls', {
 			<button @click=openProjectModal>Projects</button>
 		</div>
 	</div>`,
-	data() {
-		return {
-			activePartIndex: this.parts.findIndex(part => part == this.activePart)
-		};
-	},
 	computed: {
+		activePartIndex: {
+			get() { return this.parts.findIndex(part => part == this.activePart); },
+			set(i) { this.$emit('update-active-part', this.parts[i]); }
+		},
 		noParts() { return this.parts.length < 1; }
 	},
 	watch: {
 		parts() {
-			this.activePartIndex = null;
-		},
-		noParts() {
-			if (this.noParts) this.activePartIndex = null;
+			if (this.noParts || !this.parts.some(part => part == this.activePart)) this.activePartIndex = null;
 		}
 	},
 	methods: {
-		updateActivePart() {
-			this.$emit('update-active-part', this.parts[this.activePartIndex]);
-		},
 		partNameDisplay(part) {
 			return part.name + ' (' + part.instrument.name + ')';
 		},

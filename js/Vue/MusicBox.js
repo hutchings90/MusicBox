@@ -119,9 +119,6 @@ Vue.component('music-box', {
 		},
 		notes() {
 			this.autoProgress = false;
-		},
-		activeParts() {
-			if (!this.activeParts.some(part => part == this.activePart)) this.activePart = null;
 		}
 	},
 	methods: {
@@ -213,7 +210,7 @@ Vue.component('music-box', {
 			this.$emit('open-project-modal');
 		},
 		updateActivePart(part) {
-			this.activePart = part;
+			this.activePart = part || null;
 		},
 		onkeypressHandler(ev) {
 			if (this.hasModals) return;
