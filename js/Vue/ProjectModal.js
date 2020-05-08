@@ -75,22 +75,17 @@ Vue.component('project-modal-body-part', {
 		},
 		customInstrumentOptions: {
 			type: Array,
-			default: []
+			default: () => []
 		}
 	},
 	template: `<tr class='project-modal-body-part'>
 		<td><input @change=updateShowInEditor v-model=showInEditor type='checkbox'/></td>
 		<td><input ref=partNameInput v-model=part.name @keyup.enter=$event.target.blur() placeholder='Enter Part Name' /></td>
 		<td>
-			<select v-model=instrumentName>
-				<optgroup label='Standard'>
-					<option v-for='option in standardInstrumentOptions' v-text=option.name @change=updateInstrument>></option>
-				</optgroup>
-				<optgroup label='Custom'>
-					<option>New Custom Instrument</option>
-					<option v-for='option in customInstrumentOptions' v-text=option.name @change=updateInstrument>></option>
-				</optgroup>
-			</select>
+			<instrument-select
+				@update-instrument=updateInstrument
+				:instrument=part.instrument
+				:custom-instrument-options=customInstrumentOptions></instrument-select>
 		</td>
 	</tr>`,
 	mounted() {
@@ -98,36 +93,22 @@ Vue.component('project-modal-body-part', {
 	},
 	data() {
 		return {
-			instrumentName: this.part.instrument.name,
 			showInEditor: this.initialShowInEditor,
 			creatingCustomInstrument: false
 		};
-	},
-	computed: {
-		standardInstrumentOptions() { return Instrument.STANDARD_OPTIONS; },
-		hasCustomInstrumentOptions() { return this.customInstrumentOptions.length > 0; },
-		lastCustomInstrumentOptionIndex() { return this.customInstrumentOptions.length - 1; }
-	},
-	watch: {
-		customInstrumentOptions() {
-			if (this.creatingCustomInstrument && this.hasCustomInstrumentOptions) this.instrumentName = this.customInstrumentOptions[this.lastCustomInstrumentOptionIndex].name;
-		},
-		instrumentName() {
-			this.updateInstrument();
-		}
 	},
 	methods: {
 		updateShowInEditor() {
 			this.$emit('update-show-in-editor', this.part);
 		},
-		updateInstrument() {
-			if (this.instrumentName == 'New Custom Instrument') {
+		updateInstrument(instrumentName) {
+			if (instrumentName == 'New Custom Instrument') {
 				this.creatingCustomInstrument = true;
 				this.$emit('new-custom-instrument');
 			}
 			else {
 				this.creatingCustomInstrument = false;
-				this.part.setInstrument(this.instrumentName);
+				this.part.setInstrument(instrumentName);
 			}
 		}
 	}

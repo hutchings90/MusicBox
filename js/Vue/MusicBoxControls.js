@@ -22,13 +22,6 @@ Vue.component('music-box-controls', {
 			type: Boolean,
 			required: true
 		},
-		parts: {
-			type: Array,
-			default: () => []
-		},
-		activePart: {
-			type: Part
-		},
 		noNotes: {
 			type: Boolean,
 			required: true
@@ -58,36 +51,8 @@ Vue.component('music-box-controls', {
 			:tempo-multiplier=tempoMultiplier
 			:playing=playing
 			:no-notes=noNotes></music-box-player-controls>
-
-		<div>
-			<select v-model=activePartIndex :disabled=noParts>
-				<option v-if=noParts value=null>No Active Parts</option>
-				<option v-for='(part, i) in parts' :value=i v-text=partNameDisplay(part)></option>
-			</select>
-		</div>
-
-		<div class='music-box-project-controls'>
-			<button @click=exportMusic :disabled=disabled>Export</button>
-			<button @click=importMusic>Import</button>
-			<button @click=openProjectModal>Projects</button>
-		</div>
 	</div>`,
-	computed: {
-		activePartIndex: {
-			get() { return this.parts.findIndex(part => part == this.activePart); },
-			set(i) { this.$emit('update-active-part', this.parts[i]); }
-		},
-		noParts() { return this.parts.length < 1; }
-	},
-	watch: {
-		parts() {
-			if (this.noParts || !this.parts.some(part => part == this.activePart)) this.activePartIndex = null;
-		}
-	},
 	methods: {
-		partNameDisplay(part) {
-			return part.name + ' (' + part.instrument.name + ')';
-		},
 		setTempo(tempo) {
 			this.$emit('set-tempo', tempo);
 		},
@@ -114,15 +79,6 @@ Vue.component('music-box-controls', {
 		},
 		goToEnd() {
 			this.$emit('go-to-end');
-		},
-		exportMusic() {
-			this.$emit('export-music');
-		},
-		importMusic() {
-			this.$emit('import-music');
-		},
-		openProjectModal() {
-			this.$emit('open-project-modal');
 		}
 	}
 });

@@ -51,9 +51,9 @@ Vue.component('music-box-editor-row', {
 	template: `<tr :class=classObject>
 		<th @mouseenter=onMouseEnterTones class='music-box-editor-tone' v-text=toneNamesDisplay></th>
 		<td @click=rowClicked @mouseenter=onMouseEnterNotes @mousemove=onmousemove($event) @mouseleave=onmouseleave class='music-box-editor-score'>
-			<div v-show=hoveringOverEditor :style=newNoteTickMarkerStyle class='new-note-tick-marker'></div>
+			<div v-if=showNewNotColumn :style=newNoteTickMarkerStyle class='new-note-tick-marker'></div>
 			<div :style=tickMarkerStyle class='tick-marker'></div>
-			<div v-show=hovering :style=newNoteMarkerStyle class='new-note-marker'></div>
+			<div v-if=showNewNotMarker :style=newNoteMarkerStyle class='new-note-marker'></div>
 			<template v-for='(part, i) in parts'>
 				<music-box-editor-note
 					v-for='(note, j) in part.getNotesForTone(tone)'
@@ -75,6 +75,8 @@ Vue.component('music-box-editor-row', {
 		};
 	},
 	computed: {
+		showNewNotColumn() { return this.hoveringOverEditor && this.activePart},
+		showNewNotMarker() { return this.hovering && this.activePart; },
 		toneNamesDisplay() { return this.tone.namesDisplay},
 		isC() { return RegExp(/C[0-9]/).test(this.toneNamesDisplay); },
 		isMiddleC() { return this.toneNamesDisplay == 'C4'; },
@@ -82,6 +84,7 @@ Vue.component('music-box-editor-row', {
 		classObject() {
 			return {
 				'music-box-editor-row': true,
+				'show-new-note-indicator': Boolean(this.activePart),
 				'being-played': this.isBeingPlayed,
 				c: this.isC && !this.isMiddleC,
 				c4: this.isMiddleC,

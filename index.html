@@ -12,13 +12,18 @@
 
 		<music-box
 			v-if=audioContext
-			@export-music=exportMusic
-			@import-music=importMusic
+			@add-project=makeProject
+			@import-project=importProject
+			@activate-project=activateProject
+			@add-part=addPart
 			@open-project-modal=openProjectModal
-			:project=activeProject
+			@close-project=closeProject
+			@export-project=exportProject
+			:projects=projects
+			:active-project=activeProject
 			:tones=tones
-			:audio-context=audioContext
 			:has-modals=hasModals></music-box>
+
 		<modal-root
 			@emit=emitReceived
 			@custom-button-clicked=customButtonClicked
@@ -34,6 +39,7 @@
 	<script src='js/Models/Project.js'></script>
 
 	<!-- Generic Components -->
+	<script src='js/Vue/InstrumentSelect.js'></script>
 	<script src='js/Vue/Modal.js'></script>
 	<script src='js/Vue/ModalRoot.js'></script>
 
@@ -49,6 +55,10 @@
 	<script src='js/Vue/ProjectModal.js'></script>
 	<script src='js/Vue/ProjectsModal.js'></script>
 	<script src='js/Vue/CustomInstrumentModal.js'></script>
+	<script src='js/Vue/MusicBoxSidebarPart.js'></script>
+	<script src='js/Vue/MusicBoxSidebarProject.js'></script>
+	<script src='js/Vue/MusicBoxSidebarNote.js'></script>
+	<script src='js/Vue/MusicBoxSidebar.js'></script>
 	<script src='js/Vue/MusicBoxApp.js'></script>
 </body>
 </html>

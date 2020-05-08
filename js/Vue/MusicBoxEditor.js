@@ -12,12 +12,22 @@ Vue.component('music-box-editor', {
 			type: Boolean,
 			required: true
 		},
+		projects: {
+			type: Array,
+			default: []
+		},
+		activeProject:{
+			type: Project
+		},
 		parts: {
 			type: Array,
 			required: true
 		},
 		activePart: {
 			type: Part
+		},
+		activeNote: {
+			type: Note
 		},
 		maxTick: {
 			type: Number,
@@ -33,28 +43,46 @@ Vue.component('music-box-editor', {
 		}
 	},
 	template: `<div class='music-box-editor-container'>
-		<table class='music-box-editor'>
-			<tbody ref=editor @mousedown.right=onRightClickDown @mouseup.right=onRightClickUp @contextmenu.prevent @mouseenter=mouseEnter @mousemove=onMouseMove @mouseleave=mouseLeave>
-				<music-box-editor-row
-					v-for='(tone, i) in tones'
-					@end-hover=endHover
-					@begin-hover=beginHover
-					@moved-new-note-marker=movedNewNoteMarker
-					:key=i
-					:scroll-x=scrollCoords.x
-					:hovering-over-editor=hovering
-					:new-note-marker-tick=newNoteMarkerTick
-					:tick=tick
-					:tone=tone
-					:playing=playing
-					:parts=parts
-					:active-part=activePart
-					:notes-by-frequency=notesByFrequency
-					:x-to-tick=xToTick
-					:tick-to-x=tickToX></music-box-editor-row>
-				</music-box-editor-row>
-			</tbody>
-		</table>
+		<music-box-sidebar
+			@activate-project=activateProject
+			@part-clicked=activatePart
+			@add-project=addProject
+			@import-project=importProject
+			@add-part=addPart
+			@activate-part=activatePart
+			@close-project=closeProject
+			@export-project=exportProject
+			:projects=projects
+			:active-project=activeProject
+			:active-part=activePart
+			:active-note=activeNote></music-box-sidebar>
+
+		<div v-if=activeProject class='music-box-editor-scroller'>
+			<div class='music-box-editor-padding'>
+				<table class='music-box-editor'>
+					<tbody ref=editor @mousedown.right=onRightClickDown @mouseup.right=onRightClickUp @contextmenu.prevent @mouseenter=mouseEnter @mousemove=onMouseMove @mouseleave=mouseLeave>
+						<music-box-editor-row
+							v-for='(tone, i) in tones'
+							@end-hover=endHover
+							@begin-hover=beginHover
+							@moved-new-note-marker=movedNewNoteMarker
+							:key=i
+							:scroll-x=scrollCoords.x
+							:hovering-over-editor=hovering
+							:new-note-marker-tick=newNoteMarkerTick
+							:tick=tick
+							:tone=tone
+							:playing=playing
+							:parts=parts
+							:active-part=activePart
+							:notes-by-frequency=notesByFrequency
+							:x-to-tick=xToTick
+							:tick-to-x=tickToX></music-box-editor-row>
+						</music-box-editor-row>
+					</tbody>
+				</table>
+			</div>
+		</div>
 	</div>`,
 	created() {
 		window.onscroll = () => this.onscrollHandler();
@@ -185,7 +213,28 @@ Vue.component('music-box-editor', {
 			this.scrollCoords.y = -document.scrollingElement.scrollTop;
 		},
 		onwheelHandler(ev) {
-			if (!this.hasModals && ev.shiftKey) this.moveScrollCoords('x', this.tickToX(-3 * ev.deltaY / Math.abs(ev.deltaY)));
+			if (!this.hasModals && ev.shiftKey && ev.target.closest('.music-box-editor-scroller')) this.moveScrollCoords('x', this.tickToX(-3 * ev.deltaY / Math.abs(ev.deltaY)));
+		},
+		addProject() {
+			this.$emit('add-project');
+		},
+		importProject() {
+			this.$emit('import-project');
+		},
+		activateProject(project) {
+			this.$emit('activate-project', project);
+		},
+		activatePart(part) {
+			this.$emit('activate-part', part);
+		},
+		addPart(project) {
+			this.$emit('add-part', project);
+		},
+		closeProject(project) {
+			this.$emit('close-project', project);
+		},
+		exportProject(project) {
+			this.$emit('export-project', project);
 		}
 	}
 });

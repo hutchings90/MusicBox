@@ -67,8 +67,6 @@ Vue.component('modal-root', {
 				else this.lastModal.triggerClose = true;
 				break;
 			case 27: // 'Escape' key closes modal if active modal submits, closes otherwise.
-				if (this.inputIgnoredBySubmit(ev)) return;
-
 				if (this.lastModal.contentData.submits) this.lastModal.triggerCancel = true;
 				else this.lastModal.triggerClose = true;
 				break;

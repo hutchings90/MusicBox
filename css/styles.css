@@ -19,6 +19,11 @@ input:focus, input:not(:disabled):hover, select:focus, select:not(:disabled):hov
 	background: white;
 }
 
+button {
+	background: #f4f4f4;
+	border-radius: 50%;
+}
+
 button.danger {
 	background: red !important;
 	border-color: red !important;
@@ -40,14 +45,20 @@ button.done, button.submit {
 	text-align: center;
 }
 
+.music-box {
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
 .music-box-controls {
-	background-image: radial-gradient(#ccc, #ddd);
-	text-align: center;
-	position: sticky;
-	top: 0;
+	text-align: left;
 	padding: 5px 0;
 	border-bottom: 1px solid black;
-	z-index: 1;
+}
+
+.music-box-controls, .music-box-sidebar {
+	background-image: radial-gradient(#ccc, #ddd);
 }
 
 .music-box-controls > div > div {
@@ -98,16 +109,48 @@ button.done, button.submit {
 	margin: 0 50px;
 }
 
-.music-box-project-controls {
-	margin: 0 30px;
-}
-
-button {
-	background: #f4f4f4;
-	border-radius: 50%;
+.music-box-controls > div {
+	margin: 0 15px;
 }
 
 .music-box-editor-container {
+	overflow: auto;
+}
+
+.music-box-sidebar {
+	height: 100%;
+	float: left;
+	position: sticky;
+	top: 0;
+	text-align: left;
+	border-right: 1px solid black;
+	overflow: hidden;
+}
+
+.music-box-sidebar > div > div:first-child, .music-box-sidebar-project > div > div:first-child {
+	padding: 10px;
+}
+
+.music-box-sidebar .music-box-sidebar-project.active {
+	background: #e8e8e8;
+	border-top: 1px solid black;
+	border-bottom: 1px solid black;
+}
+
+.music-box-sidebar .music-box-sidebar-project {
+	padding: 10px;
+}
+
+.music-box-sidebar .music-box-sidebar-part {
+	margin-bottom: 10px;
+}
+
+.music-box-editor-scroller {
+	overflow: auto;
+	height: 100%;
+}
+
+.music-box-editor-padding {
 	padding: 10px 10px 20px;
 }
 
@@ -121,11 +164,11 @@ button {
 	background: #ddd;
 }
 
-.music-box-editor tr:hover td {
+.music-box-editor tr.show-new-note-indicator:hover td {
 	background: #ccc;
 }
 
-.music-box-editor tr:hover th {
+.music-box-editor tr.show-new-note-indicator:hover th {
 	background: #aaa;
 }
 

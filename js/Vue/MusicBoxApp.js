@@ -62,10 +62,7 @@ new Vue({
 			if (this.hasModals && this.lastModalIsProjectModal) this.lastModal.customData.body.activeProject = this.activeProject;
 		},
 		audioContext() {
-			if (this.audioContext && !this.hasProjects) {
-				this.makeProject();
-				this.openProjectModal();
-			}
+			if (this.audioContext && !this.hasProjects) this.makeProject();
 		}
 	},
 	methods: {
@@ -98,7 +95,7 @@ new Vue({
 						text: newProjectButtonText
 					}],
 					rightButtons: [{
-						action: 'importMusic',
+						action: 'importProject',
 						text: importProjectButtonText
 					}]
 				},
@@ -108,7 +105,7 @@ new Vue({
 		exportMusic() {
 			this.exportProject(this.activeProject);
 		},
-		importMusic() {
+		importProject() {
 			this.importElement.click();
 		},
 		getImportedJSON() {
@@ -247,6 +244,9 @@ new Vue({
 			});
 
 			return false;
+		},
+		addPart(project) {
+			project.addPart(this.audioContext);
 		}
 	}
 });
