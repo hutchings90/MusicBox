@@ -11,7 +11,7 @@
 		<title v-text=title></title>
 
 		<div v-if=notSecure>
-			Redirecting you to <a :href=secureHref ref=secureLink></a>
+			Redirecting you to <a :href=secureHref v-text=secureHref ref=secureLink></a>
 		</div>
 
 		<music-box
