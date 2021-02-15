@@ -26,7 +26,7 @@ new Vue({
 		if (this.notSecure) this.$refs.secureLink.click();
 	},
 	computed: {
-		notSecure() { return window.location.href.startsWith('https://') || window.location.href.startsWith('file:///'); },
+		notSecure() { return !(window.location.href.startsWith('https://') || window.location.href.startsWith('file:///')); },
 		secureHref() { return window.location.href.replace('http://', 'https://'); },
 		title() { return 'Music Box' + (this.activeProject ? ' - ' + (this.activeProject.name || 'Unnamed Project') : ''); },
 		hasProjects() { return this.projects.length > 0; },
