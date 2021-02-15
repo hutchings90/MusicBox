@@ -14,9 +14,22 @@ Vue.component('music-box-sidebar-project', {
 	},
 	template: `<div class='music-box-sidebar-project' :class=objectClass>
 		<input ref='projectName' v-model=project.name @click=activate @keyup.enter=$event.target.blur() placeholder='Unnamed Project' />
-		<br>
-		<button @click=close class='danger'>Close</button>
-		<button @click=exportProject>Export</button>
+		<div>
+			<button @click=close class='danger'>Close</button>
+			<button @click=exportProject>Export</button>
+		</div>
+
+		<div>
+			Notes: {{ notesShown.length }}/{{ notes.length }}
+		</div>
+
+		<div>
+			Ticks: {{ ticks }}
+		</div>
+
+		<div>
+			Length: {{ songLengthDisplay }}
+		</div>
 
 		<div v-show=isActive>
 			<div>
@@ -48,6 +61,29 @@ Vue.component('music-box-sidebar-project', {
 		partsShownInEditor: {
 			get() { return this.project.settings.partsShownInEditor; },
 			set(partsShownInEditor) { this.project.settings.partsShownInEditor = partsShownInEditor; }
+		},
+		notes() {
+			return this.project.parts
+				.reduce((notes, part) => notes.concat(part.notes), [])
+				.sort((a, b) => a.tick - b.tick);
+		},
+		notesShown() {
+			return this.partsShownInEditor
+				.reduce((notes, part) => notes.concat(part.notes), [])
+				.sort((a, b) => a.tick - b.tick);
+		},
+		firstNote() { return this.notes[0]; },
+		lastNote() { return this.notes[this.notes.length - 1]; },
+		ticks() { return this.lastNote ? this.lastNote.tick - this.firstNote.tick : 0; },
+		beats() { return this.ticks / this.project.ticksPerBeat; },
+		beatsPerSecond() { return this.project.tempo / 60; },
+		songMinutes() { return this.beats / this.project.tempo; },
+		songSeconds() { return (this.songMinutes - Math.floor(this.songMinutes)) * 60; },
+		songLengthDisplay() {
+			return [
+				Math.floor(this.songMinutes),
+				Math.round(100 * this.songSeconds) / 100
+			].join(':');
 		}
 	},
 	methods: {

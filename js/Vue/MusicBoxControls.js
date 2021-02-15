@@ -28,6 +28,10 @@ Vue.component('music-box-controls', {
 		},
 		disabled: {
 			type: Boolean
+		},
+		toneSetOptions: {
+			type: Array,
+			required: true
 		}
 	},
 	template: `<div class='music-box-controls'>
@@ -37,6 +41,13 @@ Vue.component('music-box-controls', {
 			:tempo=tempo
 			:ticks-per-beat=ticksPerBeat
 			:disabled=disabled></music-box-tempo-controls>
+
+		<div class='music-box-type-container'>
+			<label>Music Box Type</label>
+			<select v-model=selectedToneSet>
+				<option v-for='toneSet in toneSetOptions' :value=toneSet v-text=toneSet.name></option>
+			</select>
+		</div>
 
 		<music-box-player-controls
 			@play=play
@@ -52,6 +63,22 @@ Vue.component('music-box-controls', {
 			:playing=playing
 			:no-notes=noNotes></music-box-player-controls>
 	</div>`,
+	data() {
+		return {
+			selectedToneSet: this.toneSetOptions[0] || {
+				name: 'None',
+				tones: []
+			}
+		};
+	},
+	watch: {
+		selectedToneSet: {
+			immediate: true,
+			handler() {
+				this.$emit('select-tone-set', this.selectedToneSet);
+			}
+		}
+	},
 	methods: {
 		setTempo(tempo) {
 			this.$emit('set-tempo', tempo);

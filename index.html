@@ -19,10 +19,12 @@
 			@open-project-modal=openProjectModal
 			@close-project=closeProject
 			@export-project=exportProject
+			@select-tone-set=selectToneSet
 			:projects=projects
 			:active-project=activeProject
 			:tones=tones
-			:has-modals=hasModals></music-box>
+			:has-modals=hasModals
+			:tone-set-options=toneSetOptions></music-box>
 
 		<modal-root
 			@emit=emitReceived

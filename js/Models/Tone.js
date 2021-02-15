@@ -13,7 +13,49 @@ class Tone {
 		];
 	}
 
+	static get YB8() {
+		return [
+			new Tone([ 'C5' ], 523.3), new Tone([ 'C#', 'Db' ], 554.4), new Tone([ 'D' ], 587.3), new Tone([ 'D#', 'Eb' ], 622.3), new Tone([ 'E' ], 659.3), new Tone([ 'F' ], 698.5), new Tone([ 'F#', 'Gb' ], 740.0), new Tone([ 'G' ], 784.0), new Tone([ 'G#', 'Ab' ], 830.6), new Tone([ 'A' ], 880.0), new Tone([ 'A#', 'Bb' ], 932.3), new Tone([ 'B' ], 987.8),
+			new Tone([ 'C6' ], 1047), new Tone([ 'C#', 'Db' ], 1109), new Tone([ 'D' ], 1175), new Tone([ 'D#', 'Eb' ], 1245), new Tone([ 'E' ], 1319), new Tone([ 'F' ], 1397), new Tone([ 'F#', 'Gb' ], 1480), new Tone([ 'G' ], 1568), new Tone([ 'G#', 'Ab' ], 1661), new Tone([ 'A' ], 1760), new Tone([ 'A#', 'Bb' ], 1865), new Tone([ 'B' ], 1976),
+			new Tone([ 'C7' ], 2093), new Tone([ 'C#', 'Db' ], 2217), new Tone([ 'D' ], 2349), new Tone([ 'D#', 'Eb' ], 2489), new Tone([ 'E' ], 2637)
+		];
+	}
+
+	static get PAPER_TAPE_30() {
+		return [
+			new Tone([ 'C3' ], 130.8), new Tone([ 'D' ], 146.8), new Tone([ 'G' ], 196.0), new Tone([ 'A' ], 220.0), new Tone([ 'B' ], 246.9),
+			new Tone([ 'C4' ], 261.6), new Tone([ 'D' ], 293.7), new Tone([ 'E' ], 329.6), new Tone([ 'F' ], 349.2), new Tone([ 'F#', 'Gb' ], 370.0), new Tone([ 'G' ], 392.0), new Tone([ 'G#', 'Ab' ], 415.3), new Tone([ 'A4' ], 440.0), new Tone([ 'A#', 'Bb' ], 466.2), new Tone([ 'B' ], 493.9),
+			new Tone([ 'C5' ], 523.3), new Tone([ 'C#', 'Db' ], 554.4), new Tone([ 'D' ], 587.3), new Tone([ 'D#', 'Eb' ], 622.3), new Tone([ 'E' ], 659.3), new Tone([ 'F' ], 698.5), new Tone([ 'F#', 'Gb' ], 740.0), new Tone([ 'G' ], 784.0), new Tone([ 'G#', 'Ab' ], 830.6), new Tone([ 'A' ], 880.0), new Tone([ 'A#', 'Bb' ], 932.3), new Tone([ 'B' ], 987.8),
+			new Tone([ 'C6' ], 1047), new Tone([ 'D' ], 1175), new Tone([ 'E' ], 1319),
+		];
+	}
+
+	static get PAPER_TAPE_15() {
+		return [
+			new Tone([ 'C3' ], 130.8), new Tone([ 'D' ], 146.8), new Tone([ 'E' ], 164.8), new Tone([ 'F' ], 174.6), new Tone([ 'G' ], 196.0), new Tone([ 'A' ], 220.0), new Tone([ 'B' ], 246.9),
+			new Tone([ 'C4' ], 261.6), new Tone([ 'D' ], 293.7), new Tone([ 'E' ], 329.6), new Tone([ 'F' ], 349.2), new Tone([ 'G' ], 392.0), new Tone([ 'A4' ], 440.0), new Tone([ 'B' ], 493.9),
+			new Tone([ 'C5' ], 523.3),
+		];
+	}
+
 	static get MAX_TONE() { return Math.max(...Tone.TONES.map(tone => tone.frequency)); }
+	static get MAX_YB8_TONE() { return Math.max(...Tone.YB8.map(tone => tone.frequency)); }
+	static get MAX_PAPER_TAPE_30_TONE() { return Math.max(...Tone.PAPER_TAPE_30.map(tone => tone.frequency)); }
+	static get MAX_PAPER_TAPE_15_TONE() { return Math.max(...Tone.PAPER_TAPE_15.map(tone => tone.frequency)); }
+
+	static get TONE_SETS() { return [{
+		name: 'All',
+		tones: Tone.TONES
+	}, {
+		name: 'YB8',
+		tones: Tone.YB8
+	}, {
+		name: 'Paper Tape 30',
+		tones: Tone.PAPER_TAPE_30
+	}, {
+		name: 'Paper Tape 15',
+		tones: Tone.PAPER_TAPE_15
+	}]; }
 
 	constructor(names, frequency) {
 		let _names = [...names];

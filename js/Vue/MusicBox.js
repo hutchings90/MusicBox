@@ -14,6 +14,10 @@ Vue.component('music-box', {
 		hasModals: {
 			type: Boolean,
 			default: false
+		},
+		toneSetOptions: {
+			type: Array,
+			required: true
 		}
 	},
 	template: `<div class='music-box'>
@@ -29,6 +33,7 @@ Vue.component('music-box', {
 			@go-to-end=goToEnd
 			@open-project-modal=openProjectModal
 			@activate-part=activatePart
+			@select-tone-set=selectToneSet
 			:tick=tick
 			:delta-tick=deltaTick
 			:tempo=tempo
@@ -36,7 +41,8 @@ Vue.component('music-box', {
 			:tempo-multiplier=tempoMultiplier
 			:playing=playing
 			:no-notes=noActiveNotes
-			:disabled=!activeProject></music-box-controls>
+			:disabled=!activeProject
+			:tone-set-options=toneSetOptions></music-box-controls>
 
 		<music-box-editor
 			@x-axis-scroll=xAxisScroll
@@ -65,7 +71,7 @@ Vue.component('music-box', {
 			:tick=tick></commander>
 	</div>`,
 	created() {
-		window.addEventListener('keypress', ev => this.onkeypressHandler(ev));
+		window.addEventListener('keypress', ev => this.keypressHandler(ev));
 		this.activePart = this.activeParts[0];
 	},
 	data() {
@@ -219,7 +225,7 @@ Vue.component('music-box', {
 		activateNote(note) {
 			this.activeNote = note;
 		},
-		onkeypressHandler(ev) {
+		keypressHandler(ev) {
 			if (this.hasModals || !ev.target.closest('.music-box-editor-scroller')) return;
 
 			switch (ev.keyCode) {
@@ -253,6 +259,9 @@ Vue.component('music-box', {
 		},
 		exportProject(project) {
 			this.$emit('export-project', project);
+		},
+		selectToneSet(toneSet) {
+			this.$emit('select-tone-set', toneSet);
 		}
 	}
 });

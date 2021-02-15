@@ -52,7 +52,7 @@ Vue.component('music-box-editor-row', {
 		<th @mouseenter=onMouseEnterTones class='music-box-editor-tone' v-text=toneNamesDisplay></th>
 		<td @click=rowClicked @mouseenter=onMouseEnterNotes @mousemove=onmousemove($event) @mouseleave=onmouseleave class='music-box-editor-score'>
 			<div v-if=showNewNotColumn :style=newNoteTickMarkerStyle class='new-note-tick-marker'></div>
-			<div :style=tickMarkerStyle class='tick-marker'></div>
+			<!--div :style=tickMarkerStyle class='tick-marker'></div-->
 			<div v-if=showNewNotMarker :style=newNoteMarkerStyle class='new-note-marker'></div>
 			<template v-for='(part, i) in parts'>
 				<music-box-editor-note

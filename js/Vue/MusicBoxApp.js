@@ -5,11 +5,16 @@ new Vue({
 			audioContext: null,
 			modals: [],
 			projects: [],
-			activeProject: null
+			activeProject: null,
+			selectedToneSet: {
+				name: 'None',
+				tones: []
+			}
 		};
 	},
 	created() {
 		window.addEventListener('contextmenu', ev => this.contextMenuHandler(ev));
+		window.addEventListener('keydown', ev => this.keydownHandler(ev));
 
 		navigator.getUserMedia({
 			audio: true
@@ -36,9 +41,10 @@ new Vue({
 
 			return input;
 		},
-		tones() { return this.audioContext ? [...Tone.TONES].reverse() : []; },
+		toneSetOptions() { return Tone.TONE_SETS; },
+		tones() { return this.audioContext ? [...this.selectedToneSet.tones].reverse() : []; },
 		tonesByFrequency() {
-			return this.tones.reduce((reduction, tone) => {
+			return Tone.TONES.reduce((reduction, tone) => {
 				let frequency = tone.frequency;
 
 				if (!reduction[frequency]) reduction[frequency] = [];
@@ -195,6 +201,18 @@ new Vue({
 			ev.preventDefault();
 			ev.stopPropagation();
 		},
+		keydownHandler(ev) {
+			switch (ev.keyCode) {
+			case 69:
+			case 83:
+				if (ev.ctrlKey) {
+					ev.preventDefault();
+					ev.stopPropagation();
+					this.exportMusic();
+				}
+				break;
+			}
+		},
 		newCustomInstrument() {
 			let app = this;
 			let modal = this.lastModal;
@@ -247,6 +265,9 @@ new Vue({
 		},
 		addPart(project) {
 			project.addPart(this.audioContext);
+		},
+		selectToneSet(toneSet) {
+			this.selectedToneSet = toneSet;
 		}
 	}
 });

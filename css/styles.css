@@ -61,17 +61,17 @@ button.done, button.submit {
 	background-image: radial-gradient(#ccc, #ddd);
 }
 
-.music-box-controls > div > div {
+.music-box-controls > div > div, .music-box-type-container {
 	vertical-align: middle;
 }
 
-.music-box-tempo-controls > div {
+.music-box-tempo-controls > div, .music-box-type-container {
 	display: inline-block;
 	text-align: left;
 	font-size: 12px;
 }
 
-.music-box-tempo-controls > div > label {
+.music-box-tempo-controls > div > label, .music-box-type-container > label {
 	display: block;
 }
 
