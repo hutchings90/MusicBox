@@ -10,6 +10,10 @@
 	<div id='music-box-app'>
 		<title v-text=title></title>
 
+		<div v-if=nonSecure>
+			Redirecting you to <a :href=secureHref ref=secureLink></a>
+		</div>
+
 		<music-box
 			v-if=audioContext
 			@add-project=makeProject

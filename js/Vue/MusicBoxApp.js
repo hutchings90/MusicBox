@@ -20,7 +20,12 @@ new Vue({
 			audio: true
 		}, stream => this.gotStream(stream), err => this.getStreamError(err));
 	},
+	mounted() {
+		if (this.notSecure) this.$refs.secureLink.click();
+	},
 	computed: {
+		notSecure() { return window.location.href.startsWith('https://') || window.location.href.startsWith('file:///'); },
+		secureHref() { return window.location.href.replace('http://', 'https://'); },
 		title() { return 'Music Box' + (this.activeProject ? ' - ' + (this.activeProject.name || 'Unnamed Project') : ''); },
 		hasProjects() { return this.projects.length > 0; },
 		hasModals() { return this.modals.length > 0; },
