@@ -16,9 +16,11 @@ new Vue({
 		window.addEventListener('contextmenu', ev => this.contextMenuHandler(ev));
 		window.addEventListener('keydown', ev => this.keydownHandler(ev));
 
-		navigator.getUserMedia({
-			audio: true
-		}, stream => this.gotStream(stream), err => this.getStreamError(err));
+		if (navigator.getUserMedia) {
+			navigator.getUserMedia({
+				audio: true
+			}, stream => this.gotStream(stream), err => this.getStreamError(err));
+		}
 	},
 	mounted() {
 		if (this.notSecure) this.$refs.secureLink.click();
