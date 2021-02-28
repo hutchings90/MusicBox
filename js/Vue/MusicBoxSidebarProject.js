@@ -76,7 +76,6 @@ Vue.component('music-box-sidebar-project', {
 		lastNote() { return this.notes[this.notes.length - 1]; },
 		ticks() { return this.lastNote ? this.lastNote.tick - this.firstNote.tick : 0; },
 		beats() { return this.ticks / this.project.ticksPerBeat; },
-		beatsPerSecond() { return this.project.tempo / 60; },
 		songMinutes() { return this.beats / this.project.tempo; },
 		songSeconds() { return (this.songMinutes - Math.floor(this.songMinutes)) * 60; },
 		songLengthDisplay() {

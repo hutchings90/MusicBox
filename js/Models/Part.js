@@ -84,7 +84,7 @@ class Part {
 	toJSON() {
 		return {
 			name: this.name,
-			notes: this.notes,
+			notes: [...this.notes].sort((a, b) => a.tick - b.tick),
 			instrument: this.instrument
 		};
 	}
